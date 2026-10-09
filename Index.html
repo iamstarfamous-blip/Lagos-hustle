@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lagos Hustle</title>
+<style>
+body{font-family:Arial;background:#0f172a;color:white;text-align:center;margin:0;padding:20px}
+h1{color:#facc15;font-size:32px}
+.card{background:#1e293b;padding:20px;border-radius:16px;max-width:420px;margin:20px auto}
+button{background:#facc15;color:black;border:none;padding:14px 20px;font-size:18px;border-radius:10px;width:100%;margin:10px 0;cursor:pointer;font-weight:bold}
+button:active{transform:scale(0.96)}
+#cash{font-size:28px;color:#22c55e;font-weight:bold}
+.small{color:#94a3b8;font-size:14px}
+</style>
+</head>
+<body>
+<h1>🚕 LAGOS HUSTLE</h1>
+<p class="small">Tap to hustle! Buy assets and become a Lagos Big Boy</p>
+<div class="card">
+<p>Cash Balance</p>
+<div id="cash">₦0</div>
+<p id="level">Level: Street Boy</p>
+<button onclick="hustle()">💰 HUSTLE +₦500</button>
+<button onclick="buy('Keke',2000)">🛺 Buy Keke - ₦2,000</button>
+<button onclick="buy('Danfo Bus',5000)">🚌 Buy Danfo Bus - ₦5,000</button>
+<button onclick="buy('Shop in Balogun',10000)">🏪 Buy Shop - ₦10,000</button>
+<button onclick="buy('Land in Lekki',20000)">🏠 Buy Land in Lekki - ₦20,000</button>
+<p id="msg" class="small"></p>
+<p class="small">Assets: <span id="assets">None</span></p>
+</div>
+<script>
+let cash=0; let assets=[];
+function hustle(){ cash+=500; update(); document.getElementById('msg').textContent='You hustled in traffic! +₦500'; }
+function buy(name,price){ if(cash>=price){ cash-=price; assets.push(name); update(); document.getElementById('msg').textContent='You bought '+name+'! Congrats!'; } else { document.getElementById('msg').textContent='Not enough money for '+name+'! Keep hustling!'; } }
+function update(){ document.getElementById('cash').textContent='₦'+cash.toLocaleString(); document.getElementById('assets').textContent= assets.length? assets.join(', ') : 'None'; let level='Street Boy'; if(cash>5000) level='Hustler'; if(cash>15000) level='Big Boy'; if(cash>30000) level='Lagos King'; document.getElementById('level').textContent='Level: '+level; }
+</script>
+</body>
+</html>
