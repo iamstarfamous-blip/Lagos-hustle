@@ -14,6 +14,7 @@ button:active{transform:scale(.95);background:#00ff88}
 #reset{background:#ff4444;color:white}
 #bankBox{background:#00ff88;color:black;padding:15px;border-radius:10px;margin:10px 0;font-weight:bold}
 input{width:80%;padding:10px;border-radius:8px;border:none;margin:5px 0}
+#shareBtn{background:#25D366;color:white}
 </style>
 </head>
 <body>
@@ -27,6 +28,7 @@ Cash Balance<br>
 </div>
 <div id="event">⏳ Lagos event coming soon...</div>
 <button onclick="hustle()">💰 HUSTLE +₦500</button>
+<button id="shareBtn" onclick="shareScore()">📱 Share Score</button>
 <div id="bankBox">
 🏦 Bank Balance: <span id="bank">₦0</span><br>
 Interest: 5% every 10 minutes<br>
@@ -65,6 +67,12 @@ function update(){
  document.getElementById('assets').textContent = 'Assets: ' + (assets.length? assets.join(', ') : 'None');
 }
 function hustle(){ cash += 500; pop(); document.getElementById('msg').textContent = 'You hustled in traffic! +₦500'; save(); update(); }
+function shareScore(){
+ let level = cash < 10000? 'New Hustler' : cash < 50000? 'Street Boss' : cash < 200000? 'Lagos King' : 'Lagos Billionaire';
+ let msg = 'I just made ₦' + cash.toLocaleString() + ' in Lagos Hustle! My level is ' + level + ' and I earn ₦' + income.toLocaleString() + '/sec. Can you beat me? Play now: https://iamstarfamous-blip.github.io/Lagos-hustle/';
+ if(navigator.share){ navigator.share({title:'Lagos Hustle Score', text:msg, url:'https://iamstarfamous-blip.github.io/Lagos-hustle/'}); }
+ else { window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank'); }
+}
 function deposit(){
  let amt = Number(document.getElementById('bankAmount').value);
  if(amt > 0 && cash >= amt){ cash -= amt; bank += amt; pop(); beep(); document.getElementById('msg').textContent = 'Deposited ₦' + amt.toLocaleString() + ' to Bank'; }
