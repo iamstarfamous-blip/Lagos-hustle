@@ -26,6 +26,15 @@ input{width:80%;padding:10px;border-radius:8px;border:none;margin:5px 0}
 #supportBtn{background:#ff0000;color:white}
 #dailyBtn{background:#ff9800;color:white}
 #dailyBtn:disabled{background:#777;color:#ddd}
+#leaderboard{background:white;color:black;padding:15px;border-radius:10px;margin:15px 0;text-align:left}
+#leaderboard h2{margin:0 0 10px 0;text-align:center;color:#1e2a9d}
+#leaderboard ol{padding-left:20px;margin:0}
+#leaderboard li{padding:8px 0;border-bottom:1px solid #eee;font-weight:bold}
+.rank1{color:#ff9800}
+.rank2{color:#777}
+.rank3{color:#cd7f32}
+#nameInput{width:90%;padding:10px;border:1px solid #ccc;border-radius:8px;margin:5px 0}
+#saveScoreBtn{background:#1e2a9d;color:white}
 </style>
 </head>
 <body>
@@ -43,6 +52,18 @@ Cash Balance<br>
 <p id="dailyMsg" style="font-size:14px;color:#ffcc00;margin:0"></p>
 <button id="shareBtn" onclick="shareScore()">📱 Share Score</button>
 <button id="supportBtn" onclick="window.open('https://paystack.com/buy/lagos-hustle-support-rnkbus','_blank')">❤️ Support the Creator</button>
+
+<div id="leaderboard">
+<h2>🏆 LEADERBOARD</h2>
+<p style="font-size:14px;color:#666;text-align:center;margin:5px 0">Top 5 on this phone</p>
+<input type="text" id="nameInput" placeholder="Your name" maxlength="20">
+<button id="saveScoreBtn" onclick="saveScore()">💾 Save My Score to Leaderboard</button>
+<ol id="leaderList">
+<li>No scores yet. Be the first!</li>
+</ol>
+<p id="rankMsg" style="font-size:14px;color:#1e2a9d;text-align:center"></p>
+</div>
+
 <div id="bankBox">
 🏦 Bank Balance: <span id="bank">₦0</span><br>
 Interest: 5% every 10 minutes<br>
@@ -117,9 +138,6 @@ function shareScore(){
  if(navigator.share){ navigator.share({title:'Lagos Hustle Score', text:msg, url:'https://iamstarfamous-blip.github.io/Lagos-hustle/'}); }
  else { window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank'); }
 }
-function supportMe(){
- window.open('https://paystack.shop/pay/k5359h5b95', '_blank');
-}
 function deposit(){
  let amt = Number(document.getElementById('bankAmount').value);
  if(amt > 0 && cash >= amt){ cash -= amt; bank += amt; pop(); beep(); document.getElementById('msg').textContent = 'Deposited ₦' + amt.toLocaleString() + ' to Bank'; }
@@ -137,7 +155,31 @@ function buy(name, cost, inc){
  else { document.getElementById('msg').textContent = 'Not enough cash for ' + name; }
  save(); update();
 }
-function reset(){ if(confirm('Reset all money and assets?')){ cash = 0; assets = []; income = 0; bank = 0; localStorage.removeItem('lastDaily'); save(); update(); } }
+function reset(){ if(confirm('Reset all money and assets?')){ cash = 0; assets = []; income = 0; bank = 0; localStorage.removeItem('lastDaily'); save(); update(); updateLeaderboard(); } }
+function saveScore(){
+ let name = document.getElementById('nameInput').value.trim() || 'Anonymous';
+ let scores = JSON.parse(localStorage.getItem('leaderboard')) || [];
+ scores.push({name: name, cash: cash, income: income, date: new Date().toLocaleDateString()});
+ scores.sort(function(a,b){ return b.cash - a.cash; });
+ scores = scores.slice(0,5);
+ localStorage.setItem('leaderboard', JSON.stringify(scores));
+ let rank = scores.findIndex(function(s){ return s.cash === cash && s.name === name; }) + 1;
+ document.getElementById('rankMsg').textContent = rank > 0? 'You are ranked #' + rank + ' on this phone!' : 'Score saved!';
+ updateLeaderboard();
+}
+function updateLeaderboard(){
+ let scores = JSON.parse(localStorage.getItem('leaderboard')) || [];
+ let list = document.getElementById('leaderList');
+ if(scores.length === 0){ list.innerHTML = '<li>No scores yet. Be the first!</li>'; return; }
+ list.innerHTML = '';
+ scores.forEach(function(s, i){
+   let li = document.createElement('li');
+   let cls = i === 0? 'rank1' : i === 1? 'rank2' : i === 2? 'rank3' : '';
+   li.className = cls;
+   li.textContent = s.name + ' - ₦' + s.cash.toLocaleString() + ' (₦' + s.income.toLocaleString() + '/sec) - ' + s.date;
+   list.appendChild(li);
+ });
+}
 setInterval(function(){ if(income > 0){ cash += income; save(); update(); } }, 1000);
 setInterval(function(){ if(bank > 0){ let interest = Math.floor(bank * 0.05); bank += interest; document.getElementById('msg').textContent = 'Bank interest! +₦' + interest.toLocaleString(); save(); update(); } }, 600000);
 function event(){
@@ -157,6 +199,7 @@ function event(){
 }
 setInterval(event, 20000);
 update();
+updateLeaderboard();
 </script>
 </body>
 </html>
