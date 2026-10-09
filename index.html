@@ -12,6 +12,8 @@ h1{font-size:30px}
 button{width:100%;padding:15px;margin:8px 0;background:#ffcc00;border:none;border-radius:10px;font-size:18px;font-weight:bold}
 button:active{transform:scale(.95);background:#00ff88}
 #reset{background:#ff4444;color:white}
+#bankBox{background:#00ff88;color:black;padding:15px;border-radius:10px;margin:10px 0;font-weight:bold}
+input{width:80%;padding:10px;border-radius:8px;border:none;margin:5px 0}
 </style>
 </head>
 <body>
@@ -25,6 +27,13 @@ Cash Balance<br>
 </div>
 <div id="event">⏳ Lagos event coming soon...</div>
 <button onclick="hustle()">💰 HUSTLE +₦500</button>
+<div id="bankBox">
+🏦 Bank Balance: <span id="bank">₦0</span><br>
+Interest: 5% every 10 minutes<br>
+<input type="number" id="bankAmount" placeholder="Amount to deposit/withdraw" min="1">
+<button onclick="deposit()">💰 Deposit</button>
+<button onclick="withdraw()">💸 Withdraw</button>
+</div>
 <button onclick="buy('Keke',2000,10)">🛺 Buy Keke - ₦2,000 (+₦10/sec)</button>
 <button onclick="buy('Danfo Bus',5000,30)">🚌 Buy Danfo Bus - ₦5,000 (+₦30/sec)</button>
 <button onclick="buy('Shop',10000,80)">🏪 Buy Shop - ₦10,000 (+₦80/sec)</button>
@@ -40,27 +49,42 @@ Cash Balance<br>
 let cash = Number(localStorage.getItem('cash')) || 0;
 let assets = JSON.parse(localStorage.getItem('assets')) || [];
 let income = Number(localStorage.getItem('income')) || 0;
+let bank = Number(localStorage.getItem('bank')) || 0;
 let lastVisit = Number(localStorage.getItem('lastVisit')) || Date.now();
 let offlineEarnings = Math.floor((Date.now() - lastVisit) / 1000) * income;
 if(offlineEarnings > 0){ cash += offlineEarnings; alert('Welcome back! You earned ₦' + offlineEarnings.toLocaleString() + ' while you were away!'); }
-function save(){ localStorage.setItem('cash', cash); localStorage.setItem('assets', JSON.stringify(assets)); localStorage.setItem('income', income); localStorage.setItem('lastVisit', Date.now()); }
+function save(){ localStorage.setItem('cash', cash); localStorage.setItem('assets', JSON.stringify(assets)); localStorage.setItem('income', income); localStorage.setItem('bank', bank); localStorage.setItem('lastVisit', Date.now()); }
 function pop(){ let el = document.getElementById('cash'); el.classList.add('pop'); setTimeout(function(){ el.classList.remove('pop'); }, 200); }
 function beep(){ try{ let c = new AudioContext(); let o = c.createOscillator(); o.frequency.value = 880; o.connect(c.destination); o.start(); o.stop(c.currentTime + 0.15); }catch(e){} }
 function update(){
  document.getElementById('cash').textContent = '₦' + cash.toLocaleString();
+ document.getElementById('bank').textContent = '₦' + bank.toLocaleString();
  document.getElementById('income').textContent = 'Income: ₦' + income.toLocaleString() + ' / sec';
  let level = cash < 10000? 'New Hustler' : cash < 50000? 'Street Boss' : cash < 200000? 'Lagos King' : 'Lagos Billionaire';
  document.getElementById('level').textContent = 'Level: ' + level;
  document.getElementById('assets').textContent = 'Assets: ' + (assets.length? assets.join(', ') : 'None');
 }
 function hustle(){ cash += 500; pop(); document.getElementById('msg').textContent = 'You hustled in traffic! +₦500'; save(); update(); }
+function deposit(){
+ let amt = Number(document.getElementById('bankAmount').value);
+ if(amt > 0 && cash >= amt){ cash -= amt; bank += amt; pop(); beep(); document.getElementById('msg').textContent = 'Deposited ₦' + amt.toLocaleString() + ' to Bank'; }
+ else { document.getElementById('msg').textContent = 'Not enough cash or enter a valid amount'; }
+ save(); update();
+}
+function withdraw(){
+ let amt = Number(document.getElementById('bankAmount').value);
+ if(amt > 0 && bank >= amt){ bank -= amt; cash += amt; pop(); beep(); document.getElementById('msg').textContent = 'Withdrew ₦' + amt.toLocaleString() + ' from Bank'; }
+ else { document.getElementById('msg').textContent = 'Not enough Bank balance or enter a valid amount'; }
+ save(); update();
+}
 function buy(name, cost, inc){
  if(cash >= cost){ cash -= cost; assets.push(name); income += inc; pop(); beep(); document.getElementById('msg').textContent = 'You bought ' + name + '! +' + inc + '/sec'; }
  else { document.getElementById('msg').textContent = 'Not enough cash for ' + name; }
  save(); update();
 }
-function reset(){ if(confirm('Reset all money and assets?')){ cash = 0; assets = []; income = 0; save(); update(); } }
+function reset(){ if(confirm('Reset all money and assets?')){ cash = 0; assets = []; income = 0; bank = 0; save(); update(); } }
 setInterval(function(){ if(income > 0){ cash += income; save(); update(); } }, 1000);
+setInterval(function(){ if(bank > 0){ let interest = Math.floor(bank * 0.05); bank += interest; document.getElementById('msg').textContent = 'Bank interest! +₦' + interest.toLocaleString(); save(); update(); } }, 600000);
 function event(){
  let events = [
   ['You dodged Lekki traffic! +₦5,000', 5000],
