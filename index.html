@@ -40,7 +40,10 @@ Cash Balance<br>
 let cash = Number(localStorage.getItem('cash')) || 0;
 let assets = JSON.parse(localStorage.getItem('assets')) || [];
 let income = Number(localStorage.getItem('income')) || 0;
-function save(){ localStorage.setItem('cash', cash); localStorage.setItem('assets', JSON.stringify(assets)); localStorage.setItem('income', income); }
+let lastVisit = Number(localStorage.getItem('lastVisit')) || Date.now();
+let offlineEarnings = Math.floor((Date.now() - lastVisit) / 1000) * income;
+if(offlineEarnings > 0){ cash += offlineEarnings; alert('Welcome back! You earned ₦' + offlineEarnings.toLocaleString() + ' while you were away!'); }
+function save(){ localStorage.setItem('cash', cash); localStorage.setItem('assets', JSON.stringify(assets)); localStorage.setItem('income', income); localStorage.setItem('lastVisit', Date.now()); }
 function pop(){ let el = document.getElementById('cash'); el.classList.add('pop'); setTimeout(function(){ el.classList.remove('pop'); }, 200); }
 function beep(){ try{ let c = new AudioContext(); let o = c.createOscillator(); o.frequency.value = 880; o.connect(c.destination); o.start(); o.stop(c.currentTime + 0.15); }catch(e){} }
 function update(){
