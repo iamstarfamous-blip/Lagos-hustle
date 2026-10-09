@@ -13,40 +13,44 @@ button{width:100%;padding:15px;margin:8px 0;background:#ffcc00;border:none;borde
 </head>
 <body>
 <h1>🚕 LAGOS HUSTLE</h1>
-<p>Tap to hustle! Buy assets and become a Lagos Big Boy</p>
+<p>Tap to hustle! Assets earn money every second.</p>
 <div>
 Cash Balance<br>
 <div id="cash">₦0</div>
 <p id="level">Level: New Hustler</p>
+<p id="income">Income: ₦0 / sec</p>
 </div>
 <button onclick="hustle()">💰 HUSTLE +₦500</button>
-<button onclick="buy('Keke',2000)">🛺 Buy Keke - ₦2,000</button>
-<button onclick="buy('Danfo Bus',5000)">🚌 Buy Danfo Bus - ₦5,000</button>
-<button onclick="buy('Shop',10000)">🏪 Buy Shop - ₦10,000</button>
-<button onclick="buy('Land in Lekki',20000)">🏠 Buy Land in Lekki - ₦20,000</button>
-<button onclick="buy('Range Rover',50000)">🚙 Buy Range Rover - ₦50,000</button>
-<button onclick="buy('Mansion',100000)">🏛️ Buy Mansion - ₦100,000</button>
-<button onclick="buy('Yacht',250000)">🛥️ Buy Yacht - ₦250,000</button>
+<button onclick="buy('Keke',2000,10)">🛺 Buy Keke - ₦2,000 (+₦10/sec)</button>
+<button onclick="buy('Danfo Bus',5000,30)">🚌 Buy Danfo Bus - ₦5,000 (+₦30/sec)</button>
+<button onclick="buy('Shop',10000,80)">🏪 Buy Shop - ₦10,000 (+₦80/sec)</button>
+<button onclick="buy('Land in Lekki',20000,150)">🏠 Buy Land in Lekki - ₦20,000 (+₦150/sec)</button>
+<button onclick="buy('Range Rover',50000,400)">🚙 Buy Range Rover - ₦50,000 (+₦400/sec)</button>
+<button onclick="buy('Mansion',100000,1000)">🏛️ Buy Mansion - ₦100,000 (+₦1,000/sec)</button>
+<button onclick="buy('Yacht',250000,3000)">🛥️ Buy Yacht - ₦250,000 (+₦3,000/sec)</button>
 <p id="msg">You hustled in traffic! +₦500</p>
 <p id="assets">Assets: None</p>
 <button id="reset" onclick="reset()">🔄 Reset Game</button>
 <script>
 let cash = Number(localStorage.getItem('cash')) || 0;
 let assets = JSON.parse(localStorage.getItem('assets')) || [];
-function save(){ localStorage.setItem('cash', cash); localStorage.setItem('assets', JSON.stringify(assets)); }
+let income = Number(localStorage.getItem('income')) || 0;
+function save(){ localStorage.setItem('cash', cash); localStorage.setItem('assets', JSON.stringify(assets)); localStorage.setItem('income', income); }
 function update(){
  document.getElementById('cash').textContent = '₦' + cash.toLocaleString();
+ document.getElementById('income').textContent = 'Income: ₦' + income.toLocaleString() + ' / sec';
  let level = cash < 10000 ? 'New Hustler' : cash < 50000 ? 'Street Boss' : cash < 200000 ? 'Lagos King' : 'Lagos Billionaire';
  document.getElementById('level').textContent = 'Level: ' + level;
  document.getElementById('assets').textContent = 'Assets: ' + (assets.length ? assets.join(', ') : 'None');
 }
 function hustle(){ cash += 500; document.getElementById('msg').textContent = 'You hustled in traffic! +₦500'; save(); update(); }
-function buy(name, cost){
- if(cash >= cost){ cash -= cost; assets.push(name); document.getElementById('msg').textContent = 'You bought ' + name + '!'; }
+function buy(name, cost, inc){
+ if(cash >= cost){ cash -= cost; assets.push(name); income += inc; document.getElementById('msg').textContent = 'You bought ' + name + '! +' + inc + '/sec'; }
  else { document.getElementById('msg').textContent = 'Not enough cash for ' + name; }
  save(); update();
 }
-function reset(){ if(confirm('Reset all money and assets?')){ cash = 0; assets = []; save(); update(); } }
+function reset(){ if(confirm('Reset all money and assets?')){ cash = 0; assets = []; income = 0; save(); update(); } }
+setInterval(function(){ if(income > 0){ cash += income; save(); update(); } }, 1000);
 update();
 </script>
 </body>
