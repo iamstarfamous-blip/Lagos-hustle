@@ -3,160 +3,145 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Lagos Hustle - Global Edition</title>
+<title>Lagos Hustle V2 - Global</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:#0a0a0a;color:#fff;font-family:'Inter',sans-serif;overflow:hidden;touch-action:none}
-#gameWrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column;background:radial-gradient(circle at 50% 0%, #1a3a2a 0%, #0a0a0a 70%)}
-#header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;z-index:10}
-.logo{font-family:'Bebas Neue';font-size:28px;letter-spacing:2px}
-.logo span{color:#00ff88}
-#scoreBox{font-weight:900;font-size:18px;background:#111;padding:8px 14px;border-radius:20px;border:1px solid #222}
+#wrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column;background:#080e0a}
+#header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:#000a;backdrop-filter:blur(8px);z-index:10;border-bottom:1px solid #ffffff11}
+.logo{font-family:'Bebas Neue';font-size:28px;letter-spacing:2px}.logo span{color:#00ff88}
+#score{font-weight:900;font-size:20px;background:#00ff88;color:#000;padding:8px 18px;border-radius:30px}
 canvas{flex:1;width:100%;display:block}
-#controls{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;padding:16px;pointer-events:none;z-index:10}
-.btn{pointer-events:auto;width:72px;height:72px;border-radius:50%;background:#ffffff12;border:2px solid #ffffff22;backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;font-size:28px;user-select:none}
-.btn:active{transform:scale(0.9);background:#00ff8822}
-#overlay{position:absolute;inset:0;background:#000e;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;padding:24px;text-align:center}
-h1{font-family:'Bebas Neue';font-size:56px;line-height:0.9;margin-bottom:12px}
-h1 span{color:#00ff88}
-p{opacity:0.7;margin-bottom:20px;max-width:320px;line-height:1.4}
-.inputRow{display:flex;gap:8px;width:100%;max-width:320px;margin-bottom:16px}
-input{flex:1;background:#111;border:1px solid #333;border-radius:12px;padding:14px;color:#fff;font-weight:700;outline:none}
-#mainBtn{background:#00ff88;color:#000;border:none;padding:16px 36px;border-radius:100px;font-weight:900;font-size:18px;letter-spacing:1px;width:100%;max-width:320px}
-#leaderboard{width:100%;max-width:360px;margin-top:20px;background:#111;border:1px solid #222;border-radius:16px;padding:12px;max-height:40vh;overflow:auto}
-.lb-row{display:flex;justify-content:space-between;padding:8px 12px;border-radius:10px;font-size:14px}
-.lb-row:nth-child(1){background:#00ff8822;font-weight:900}
-.lb-row.me{background:#fff1;border:1px dashed #00ff88}
-.small{font-size:12px;opacity:0.5;margin-top:8px}
-#jumpHint{position:absolute;top:60px;width:100%;text-align:center;opacity:0.5;font-size:12px;letter-spacing:2px;pointer-events:none}
+#controls{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:22px;padding:0 16px;z-index:10;pointer-events:none}
+.cbtn{pointer-events:auto;width:78px;height:78px;border-radius:50%;background:#ffffff18;border:2px solid #ffffff28;backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;user-select:none}
+.cbtn:active{transform:scale(0.92);background:#00ff8844}
+#overlay{position:absolute;inset:0;background:radial-gradient(circle at 50% 0%, #123122 0%, #000 75%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;padding:22px;text-align:center}
+h1{font-family:'Bebas Neue';font-size:64px;line-height:0.85;margin-bottom:10px} h1 span{color:#00ff88}
+.sub{opacity:0.65;margin-bottom:18px;max-width:320px;line-height:1.4;font-size:15px}
+.inputRow{display:flex;width:100%;max-width:340px;margin-bottom:14px}
+input{flex:1;background:#111;border:2px solid #222;border-radius:14px;padding:16px;color:#fff;font-weight:800;outline:none;font-size:16px}
+input:focus{border-color:#00ff88}
+#mainBtn{background:#00ff88;color:#000;border:none;padding:18px 36px;border-radius:100px;font-weight:900;font-size:18px;width:100%;max-width:340px;letter-spacing:0.5px}
+#board{width:100%;max-width:360px;margin-top:18px;background:#0f0f0f;border:1px solid #222;border-radius:18px;padding:12px;max-height:36vh;overflow:auto}
+.row{display:flex;justify-content:space-between;padding:10px 14px;border-radius:12px;font-size:14px;margin-bottom:4px;background:#ffffff06}
+.row:nth-child(1){background:#00ff8826;border:1px solid #00ff8844;font-weight:900;font-size:15px}
+.row.me{border:1px dashed #00ff88;background:#00ff8811}
+.small{font-size:11px;opacity:0.4;margin-top:10px;letter-spacing:1px}
+.hint{position:absolute;top:70px;width:100%;text-align:center;opacity:0.35;font-size:12px;letter-spacing:3px;z-index:5}
 </style>
 </head>
 <body>
-<div id="gameWrap">
-<div id="header"><div class="logo">LAGOS <span>HUSTLE</span></div><div id="scoreBox">₦0</div></div>
-<div id="jumpHint">TAP TO JUMP • DODGE DANFO</div>
+<div id="wrap">
+<div id="header"><div class="logo">LAGOS <span>HUSTLE</span></div><div id="score">₦0</div></div>
+<div class="hint">◀ SWIPE LANES • TAP JUMP ▶</div>
 <canvas id="c"></canvas>
-<div id="controls"><div class="btn" id="leftBtn">←</div><div class="btn" id="jumpBtn">↑</div><div class="btn" id="rightBtn">→</div></div>
-
+<div id="controls"><div class="cbtn" id="l">←</div><div class="cbtn" id="j">JUMP</div><div class="cbtn" id="r">→</div></div>
 <div id="overlay">
 <h1>LAGOS<br><span>HUSTLE</span></h1>
-<p>Dodge danfo, grab cash, hustle never stops. Global leaderboard live!</p>
-<div class="inputRow"><input id="nameInput" placeholder="Your street name e.g. Seyi" maxlength="12"></div>
+<div class="sub">Dodge yellow danfo, grab ₦, become street king. Global leaderboard live!</div>
+<div class="inputRow"><input id="name" placeholder="Your street name" maxlength="12"></div>
 <button id="mainBtn">START HUSTLE</button>
-<div id="leaderboard"><div style="opacity:0.5;text-align:center;padding:12px">Loading global scores...</div></div>
-<div class="small">Global leaderboard • Firestore live • lagos-hustle-a27d7</div>
+<div id="board"><div style="opacity:.5;text-align:center;padding:14px">Loading global board...</div></div>
+<div class="small">V2 • FIRESTORE LIVE • LAGOS-HUSTLE-A27D7</div>
 </div>
 </div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCdmLasZpFtzhfTjn65dyggLxsNCTkHuZI",
-  authDomain: "lagos-hustle-a27d7.firebaseapp.com",
-  projectId: "lagos-hustle-a27d7",
-  storageBucket: "lagos-hustle-a27d7.firebasestorage.app",
-  messagingSenderId: "737760929025",
-  appId: "1:737760929025:web:ab7221ad816c83accba700"
-};
-
+const firebaseConfig = { apiKey: "AIzaSyCdmLasZpFtzhfTjn65dyggLxsNCTkHuZI", authDomain: "lagos-hustle-a27d7.firebaseapp.com", projectId: "lagos-hustle-a27d7", storageBucket: "lagos-hustle-a27d7.firebasestorage.app", messagingSenderId: "737760929025", appId: "1:737760929025:web:ab7221ad816c83accba700" };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const lbRef = collection(db, "leaderboard");
-
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
-let W,H;
-function resize(){W=canvas.width=canvas.clientWidth*2;H=canvas.height=canvas.clientHeight*2;}
-window.addEventListener('resize',resize);resize();
-const overlay=document.getElementById('overlay');
-const scoreBox=document.getElementById('scoreBox');
-const nameInput=document.getElementById('nameInput');
-const mainBtn=document.getElementById('mainBtn');
-const lbDiv=document.getElementById('leaderboard');
-let gameState='menu', score=0, highScore=0, player, obstacles, cash, speed, frame;
-
+const canvas=document.getElementById('c'); const ctx=canvas.getContext('2d');
+let W,H,dpr=1;
+function resize(){dpr=Math.min(window.devicePixelRatio||1,2); W=canvas.clientWidth; H=canvas.clientHeight; canvas.width=W*dpr; canvas.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);}
+window.addEventListener('resize',resize); setTimeout(resize,50);
+const scoreEl=document.getElementById('score'), overlay=document.getElementById('overlay'), nameInput=document.getElementById('name'), mainBtn=document.getElementById('mainBtn'), board=document.getElementById('board');
+let state='menu', score=0, speed=0, frame=0, player, obs=[], cash=[], lanes=3;
 class Player{
-  constructor(){this.w=36;this.h=48;this.x=W/2-this.w/2;this.y=H-200;this.vy=0;this.onGround=true;this.lane=1;}
-  update(){
-    if(!this.onGround){this.vy+=2.2;this.y+=this.vy;if(this.y>=H-200){this.y=H-200;this.vy=0;this.onGround=true;}}
-    const targetX = (W/3)*this.lane + W/6 - this.w/2;
-    this.x += (targetX - this.x)*0.25;
-  }
-  jump(){if(this.onGround){this.vy=-32;this.onGround=false;}}
+  constructor(){this.lane=1; this.y=H-150; this.vy=0; this.groundY=H-150; this.onGround=true; this.w=50; this.h=62;}
+  get x(){return (W/lanes)*this.lane + (W/lanes)/2 - this.w/2;}
+  jump(){if(this.onGround){this.vy=-18; this.onGround=false;}}
+  update(){if(!this.onGround){this.vy+=0.95; this.y+=this.vy; if(this.y>=this.groundY){this.y=this.groundY; this.vy=0; this.onGround=true;}}}
   draw(){
-    ctx.save();
-    ctx.translate(this.x+this.w/2,this.y+this.h/2);
-    ctx.fillStyle='#00ff88';ctx.fillRect(-this.w/2,-this.h/2,this.w,this.h);
-    ctx.fillStyle='#000';ctx.fillRect(-8,-12,16,8);
+    ctx.save(); ctx.translate(this.x+this.w/2, this.y+this.h/2);
+    ctx.fillStyle='rgba(0,0,0,0.4)'; ctx.fillRect(-22, this.h/2-6, 44, 8);
+    ctx.fillStyle='#00ff88'; ctx.fillRect(-22,-30,44,50);
+    ctx.fillStyle='#ffdbac'; ctx.fillRect(-14,-46,28,20);
+    ctx.fillStyle='#000'; ctx.fillRect(-10,-36,6,4); ctx.fillRect(4,-36,6,4);
     ctx.restore();
   }
 }
-function spawnOb(){const lane=Math.floor(Math.random()*3);obstacles.push({x:(W/3)*lane+W/6-30,y:-80,w:60,h:40,type:Math.random()>0.5?'danfo':'pothole'});}
-function spawnCash(){const lane=Math.floor(Math.random()*3);cash.push({x:(W/3)*lane+W/6-15,y:-60,w:30,h:30,got:false});}
+function spawnObs(){const lane=Math.floor(Math.random()*lanes); obs.push({lane, y:-100, w:70, h:48, type:'danfo'});}
+function spawnCash(){const lane=Math.floor(Math.random()*lanes); cash.push({lane, y:-80, w:44, h:44});}
+function drawRoad(){
+  ctx.fillStyle='#151515'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#0e0e0e'; for(let i=0;i<lanes;i++){ctx.fillRect((W/lanes)*i+4,0,W/lanes-8,H);}
+  ctx.strokeStyle='#2a2a2a'; ctx.setLineDash([28,28]); ctx.lineWidth=3;
+  for(let i=1;i<lanes;i++){ctx.beginPath(); ctx.moveTo((W/lanes)*i,0); ctx.lineTo((W/lanes)*i,H); ctx.stroke();}
+  ctx.setLineDash([]); ctx.lineWidth=1;
+}
 function loop(){
-  if(gameState!=='play')return;
-  frame++;ctx.clearRect(0,0,W,H);
-  ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle='#222';for(let i=0;i<3;i++){ctx.beginPath();ctx.setLineDash([20,20]);ctx.moveTo((W/3)*(i+1),0);ctx.lineTo((W/3)*(i+1),H);ctx.stroke();}
-  ctx.setLineDash([]);
-  if(frame%55===0)spawnOb();
-  if(frame%30===0)spawnCash();
-  speed+=0.01;score+=1;scoreBox.textContent='₦'+score;
-  player.update();player.draw();
-  for(let i=obstacles.length-1;i>=0;i--){let o=obstacles[i];o.y+=6+speed;ctx.fillStyle=o.type==='danfo'?'#ffcc00':'#333';ctx.fillRect(o.x,o.y,o.w,o.h);if(o.type==='danfo'){ctx.fillStyle='#000';ctx.fillRect(o.x+5,o.y+5,o.w-10,10);} if(o.y>H){obstacles.splice(i,1);continue;} if(o.x<player.x+player.w&&o.x+o.w>player.x&&o.y<player.y+player.h&&o.y+o.h>player.y){endGame();return;}}
-  for(let i=cash.length-1;i>=0;i--){let c=cash[i];c.y+=6+speed;if(!c.got){ctx.fillStyle='#00ff88';ctx.beginPath();ctx.arc(c.x+c.w/2,c.y+c.h/2,14,0,Math.PI*2);ctx.fill();ctx.fillStyle='#000';ctx.font='bold 14px Inter';ctx.fillText('₦',c.x+8,c.y+19);} if(c.y>H){cash.splice(i,1);continue;} if(c.x<player.x+player.w&&c.x+c.w>player.x&&c.y<player.y+player.h&&c.y+c.h>player.y){score+=100;c.got=true;cash.splice(i,1);}}
+  if(state!=='play')return;
+  frame++; drawRoad();
+  speed+=0.004; score+=1; scoreEl.textContent='₦'+score;
+  if(frame%70===0)spawnObs();
+  if(frame%55===0)spawnCash();
+  player.update(); player.draw();
+  for(let i=obs.length-1;i>=0;i--){let o=obs[i]; o.y+=5+speed*4;
+    let ox=(W/lanes)*o.lane + (W/lanes)/2 - o.w/2;
+    ctx.fillStyle='#ffcc00'; ctx.fillRect(ox,o.y,o.w,o.h);
+    ctx.fillStyle='#000'; ctx.fillRect(ox+4,o.y+6,o.w-8,12);
+    ctx.fillStyle='#333'; ctx.fillRect(ox+6,o.y+o.h-10,14,8); ctx.fillRect(ox+o.w-20,o.y+o.h-10,14,8);
+    if(o.y>H+100){obs.splice(i,1); continue;}
+    if(o.lane===player.lane && o.y+o.h>player.y+12 && o.y<player.y+player.h-6){return endGame();}
+  }
+  for(let i=cash.length-1;i>=0;i--){let c=cash[i]; c.y+=5+speed*4;
+    let cx=(W/lanes)*c.lane + (W/lanes)/2 - c.w/2;
+    ctx.fillStyle='#00ff88'; ctx.beginPath(); ctx.arc(cx+c.w/2,c.y+c.h/2,18,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#000'; ctx.font='900 18px Inter'; ctx.fillText('₦',cx+13,c.y+27);
+    ctx.strokeStyle='#00ff8844'; ctx.lineWidth=3; ctx.stroke();
+    if(c.y>H+100){cash.splice(i,1); continue;}
+    if(c.lane===player.lane && c.y+c.h>player.y && c.y<player.y+player.h){score+=150; cash.splice(i,1); if(navigator.vibrate)navigator.vibrate(30);}
+  }
   requestAnimationFrame(loop);
 }
-async function loadLeaderboard(meScore=null, meName=null){
+async function loadBoard(meScore=null, meName=null){
   try{
     const q=query(lbRef, orderBy('score','desc'), limit(20));
     const snap=await getDocs(q);
-    let html='';
-    let rank=1;
-    snap.forEach(doc=>{
-      const d=doc.data();
-      const isMe = meScore!==null && d.name===meName && d.score===meScore;
-      html+=`<div class="lb-row ${isMe?'me':''}"><span>${rank}. ${d.name||'Anon'}</span><span>₦${d.score}</span></div>`;
-      rank++;
-    });
-    if(!html)html='<div style="opacity:0.5;text-align:center">No scores yet. Be first!</div>';
-    lbDiv.innerHTML=html;
-  }catch(e){lbDiv.innerHTML='<div style="opacity:0.5">Offline: '+e.message+'</div>';}
+    let html=''; let rank=1;
+    snap.forEach(d=>{const v=d.data(); const isMe=meScore!==null && v.name===meName && v.score===meScore; html+=`<div class="row ${isMe?'me':''}"><span>${rank}. ${v.name||'Anon'}</span><span>₦${v.score}</span></div>`; rank++;});
+    if(!html)html='<div style="opacity:.5;text-align:center">No scores yet. Be first!</div>';
+    board.innerHTML=html;
+  }catch(e){board.innerHTML='<div style="opacity:.5">Board error: '+e.message+'</div>';}
 }
-async function saveScore(name,scoreVal){
-  try{await addDoc(lbRef,{name:name.slice(0,12)||'Anon',score:scoreVal,created:serverTimestamp()});}catch(e){console.log(e);}
-}
+async function saveScore(name,val){try{await addDoc(lbRef,{name:name.slice(0,12)||'Anon',score:val,created:serverTimestamp()});}catch(e){}}
 async function endGame(){
-  gameState='over';
-  if(score>highScore)highScore=score;
-  const name=nameInput.value||'Anon';
+  state='over'; const name=nameInput.value||'Anon';
   overlay.style.display='flex';
   document.querySelector('#overlay h1').innerHTML=`YOU HUSTLED<br><span>₦${score}</span>`;
-  document.querySelector('#overlay p').textContent= score>1000?'Street legend! Saving to global board...':'Omo! Danfo jam you. Saving score...';
+  document.querySelector('.sub').textContent= score>2000?'STREET LEGEND! 👑':'Danfo jam you! Try again';
   mainBtn.textContent='HUSTLE AGAIN';
-  if(score>20){await saveScore(name,score);}
-  await loadLeaderboard(score,name);
+  if(score>30)await saveScore(name,score);
+  await loadBoard(score,name);
 }
-function startGame(){
-  if(!nameInput.value){nameInput.style.borderColor='#f55';nameInput.placeholder='Enter your name first!';return;}
+function start(){
+  if(!nameInput.value.trim()){nameInput.style.borderColor='#ff4444'; nameInput.placeholder='Enter name first!'; return;}
   localStorage.setItem('lagos_name',nameInput.value);
-  score=0;speed=0;frame=0;obstacles=[];cash=[];player=new Player();
-  gameState='play';overlay.style.display='none';
-  loop();
+  score=0; speed=0; frame=0; obs=[]; cash=[]; player=new Player();
+  state='play'; overlay.style.display='none'; loop();
 }
-mainBtn.addEventListener('click',startGame);
-document.getElementById('jumpBtn').addEventListener('touchstart',e=>{e.preventDefault();if(gameState==='play')player?.jump();});
-document.getElementById('jumpBtn').addEventListener('click',()=>{if(gameState==='play')player?.jump();});
-document.getElementById('leftBtn').addEventListener('touchstart',e=>{e.preventDefault();if(player)player.lane=Math.max(0,player.lane-1);});
-document.getElementById('rightBtn').addEventListener('touchstart',e=>{e.preventDefault();if(player)player.lane=Math.min(2,player.lane+1);});
-document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp')player?.jump();if(e.code==='ArrowLeft')player.lane=Math.max(0,player.lane-1);if(e.code==='ArrowRight')player.lane=Math.min(2,player.lane+1);});
-canvas.addEventListener('touchstart',e=>{if(gameState==='play')player?.jump();});
-canvas.addEventListener('click',e=>{if(gameState==='play')player?.jump();});
-loadLeaderboard();
-nameInput.value=localStorage.getItem('lagos_name')||'';
+mainBtn.addEventListener('click',start);
+document.getElementById('j').addEventListener('touchstart',e=>{e.preventDefault(); if(state==='play')player?.jump();},{passive:false});
+document.getElementById('j').addEventListener('click',()=>{if(state==='play')player?.jump();});
+document.getElementById('l').addEventListener('touchstart',e=>{e.preventDefault(); player.lane=Math.max(0,player.lane-1);},{passive:false});
+document.getElementById('r').addEventListener('touchstart',e=>{e.preventDefault(); player.lane=Math.min(2,player.lane+1);},{passive:false});
+document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp')player?.jump(); if(e.code==='ArrowLeft')player.lane=Math.max(0,player.lane-1); if(e.code==='ArrowRight')player.lane=Math.min(2,player.lane+1);});
+canvas.addEventListener('touchstart',e=>{if(state==='play'&&e.touches[0].clientY < H*0.7)player?.jump();},{passive:true});
+loadBoard();
+nameInput.value=localStorage.getItem('lagos_name')||'Oluwadamilol';
 </script>
 </body>
 </html>
