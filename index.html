@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Lagos Hustle V6 - Weekly Auto Reset</title>
+<title>Lagos Hustle V6.1 - Weekly Auto Reset</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial;background:#111;color:#fff;overflow:hidden;touch-action:none}
@@ -40,7 +40,7 @@ body{font-family:Arial;background:#111;color:#fff;overflow:hidden;touch-action:n
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCdmLasZpFtzhfTjn65dyggLxsNCTkHuZI",
@@ -54,7 +54,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// WEEK LOGIC - AUTO RESET
 function getWeekStart(){
   let now=new Date();
   let day=now.getDay();
@@ -89,6 +88,8 @@ function jump(){
     else{pos+=14;player.style.bottom=(110+pos)+'px';}
   },20);
 }
+document.addEventListener('touchstart', jump);
+document.addEventListener('keydown', (e)=>{if(e.code==='Space') jump();});
 
 function createObstacle(){
   if(!gameActive) return;
@@ -120,4 +121,74 @@ function createCoin(){
     if(!gameActive){clearInterval(move);coin.remove();return;}
     l-=5;
     coin.style.left=l+'px';
-    if(l<-
+    if(l<-60){clearInterval(move);coin.remove();return;}
+    let pRect=player.getBoundingClientRect();
+    let cRect=coin.getBoundingClientRect();
+    if(!(pRect.right-10<cRect.left||pRect.left+10>cRect.right||pRect.bottom-10<cRect.top||pRect.top+10>cRect.bottom)){
+      score+=10;
+      scoreEl.innerText='₦'+score;
+      clearInterval(move);
+      coin.remove();
+    }
+  },16);
+}
+
+async function loadBoard(){
+  let board=document.getElementById('board');
+  try{
+    const snap=await getDocs(collection(db,"scores"));
+    let all=[];
+    snap.forEach(doc=>{
+      let d=doc.data();
+      if(d.timestamp){
+        let t=d.timestamp.toDate ? d.timestamp.toDate() : new Date(d.timestamp);
+        if(t>=weekStart) all.push(d);
+      }else{
+        all.push(d);
+      }
+    });
+    all.sort((a,b)=>b.score-a.score);
+    all=all.slice(0,5);
+    if(all.length===0){board.innerHTML="No scores yet - Be first!"; return;}
+    board.innerHTML=all.map((s,i)=>`${i+1}. ${s.name} - ₦${s.score}`).join('<br>');
+  }catch(e){
+    console.log("Board error",e);
+    board.innerHTML="No scores yet - Be first!<br><small style='opacity:0.6'>"+e.message.slice(0,30)+"</small>";
+  }
+}
+
+async function saveScore(name){
+  try{
+    await addDoc(collection(db,"scores"),{name:name, score:score, timestamp:serverTimestamp()});
+  }catch(e){
+    alert("Save failed: "+e.message);
+  }
+  loadBoard();
+}
+
+function gameOver(){
+  gameActive=false;
+  setTimeout(async ()=>{
+    let name=prompt("Game Over! Your score: ₦"+score+"\nEnter name for leaderboard:");
+    if(name){
+      await saveScore(name.substring(0,12));
+    }
+    score=0;
+    scoreEl.innerText='₦0';
+    document.querySelectorAll('.obstacle,.coin').forEach(el=>el.remove());
+    gameActive=true;
+    loadBoard();
+  },200);
+}
+
+function claimPrize(){
+  window.open("https://wa.me/2348125563943?text=I%20won%20Lagos%20Hustle%20Week%20"+getWeekNumber()+"%20with%20score%20%E2%82%A6"+score,"_blank");
+}
+
+loadBoard();
+setInterval(createObstacle,1500);
+setInterval(createCoin,1000);
+setInterval(loadBoard,10000);
+</script>
+</body>
+</html>
