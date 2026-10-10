@@ -1,65 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lagos Hustle V6 - Auto Weekly Reset</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Lagos Hustle V6 - Weekly Auto Reset</title>
 <style>
-body{margin:0;background:#111;color:#fff;font-family:Arial;overflow:hidden}
-#game{position:relative;width:100vw;height:100vh;background:linear-gradient(#87CEEB,#E0F6FF);overflow:hidden}
-#player{position:absolute;width:50px;height:50px;background:#FFD700;border-radius:50%;left:50px;bottom:100px;z-index:10;border:3px solid #000}
-.obstacle{position:absolute;width:40px;height:40px;background:red;bottom:100px}
-.coin{position:absolute;width:30px;height:30px;background:gold;border-radius:50%;bottom:120px;border:2px solid #000}
-#score{position:absolute;top:10px;left:10px;font-size:24px;font-weight:bold;color:#000;z-index:100}
-#tournament{position:absolute;top:0;width:100%;background:linear-gradient(90deg,#FF6B00,#FFD700);color:#000;text-align:center;padding:8px;font-weight:bold;font-size:14px;z-index:100}
-#leaderboard{position:absolute;top:50px;right:10px;background:rgba(0,0,0,0.85);padding:10px;border-radius:10px;min-width:180px;z-index:100;font-size:13px}
-#controls{position:absolute;bottom:20px;width:100%;display:flex;justify-content:center;gap:20px;z-index:100}
-.btn{padding:15px 25px;background:#FF6B00;color:#fff;border:none;border-radius:10px;font-weight:bold}
-#support{position:absolute;bottom:80px;left:10px;background:rgba(0,0,0,0.8);padding:8px;border-radius:8px;z-index:100}
-#support a{color:#25D366;text-decoration:none;font-weight:bold}
-#prizeBtn{position:absolute;bottom:80px;right:10px;background:#25D366;color:#fff;padding:8px 12px;border-radius:8px;border:none;font-weight:bold;z-index:100}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial;background:#111;color:#fff;overflow:hidden;touch-action:none}
+#game{position:relative;width:100vw;height:100vh;background:linear-gradient(to bottom,#87CEEB 0%,#E0F6FF 60%,#F4A460 60%,#8B4513 100%);overflow:hidden}
+#player{position:absolute;width:48px;height:48px;background:#FFD700;border:3px solid #000;border-radius:50%;left:60px;bottom:110px;z-index:10;transition:bottom 0.1s}
+#player::after{content:"😎";font-size:28px;position:absolute;top:5px;left:7px}
+#ground{position:absolute;bottom:0;width:100%;height:100px;background:#333}
+#tournament{position:absolute;top:0;left:0;width:100%;background:linear-gradient(90deg,#FF6B00,#FFD700);color:#000;text-align:center;padding:10px 5px;font-weight:900;font-size:13px;z-index:100;letter-spacing:0.5px}
+#score{position:absolute;top:45px;left:10px;font-size:26px;font-weight:900;color:#000;background:rgba(255,255,255,0.9);padding:5px 12px;border-radius:20px;z-index:100}
+#leaderboard{position:absolute;top:45px;right:8px;background:rgba(0,0,0,0.88);padding:10px;border-radius:12px;min-width:175px;max-width:190px;z-index:100;font-size:12px;line-height:1.6;border:2px solid #FFD700}
+#controls{position:absolute;bottom:15px;width:100%;display:flex;justify-content:center;gap:15px;z-index:100}
+.btn{padding:18px 35px;background:linear-gradient(#FF6B00,#FF4500);color:#fff;border:3px solid #000;border-radius:15px;font-weight:900;font-size:18px;box-shadow:0 4px 0 #000}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
+#support{position:absolute;bottom:85px;left:8px;background:rgba(0,0,0,0.85);padding:8px 10px;border-radius:10px;z-index:100;font-size:11px;border:1px solid #25D366}
+#support a{color:#25D366;text-decoration:none;font-weight:900}
+#prizeBtn{position:absolute;bottom:85px;right:8px;background:linear-gradient(#25D366,#128C7E);color:#fff;padding:10px 14px;border-radius:10px;border:2px solid #000;font-weight:900;z-index:100;font-size:12px}
+.obstacle{position:absolute;width:38px;height:55px;background:linear-gradient(#FF0000,#8B0000);bottom:100px;border:2px solid #000;border-radius:5px}
+.obstacle::after{content:"🚧";position:absolute;top:10px;left:3px;font-size:20px}
+.coin{position:absolute;width:32px;height:32px;background:radial-gradient(#FFD700,#FFA500);border-radius:50%;bottom:130px;border:2px solid #000;display:flex;align-items:center;justify-content:center;font-size:16px}
+.coin::after{content:"₦"}
 </style>
 </head>
 <body>
 <div id="game">
 <div id="tournament">🏆 WEEK <span id="weekNum">1</span> TOURNAMENT - TOP 3 WIN ₦500 AIRTIME SUNDAY 8PM! AUTO RESET MONDAY!</div>
 <div id="score">₦0</div>
-<div id="leaderboard"><b>🔥 THIS WEEK</b><div id="board">Loading...</div></div>
+<div id="leaderboard"><b>🔥 THIS WEEK BOARD</b><div id="board" style="margin-top:6px">Loading...</div><div style="margin-top:6px;font-size:10px;opacity:0.7">Resets Mon 12AM</div></div>
 <div id="player"></div>
-<div id="support">💛 Support Dev<br><a href="https://wa.me/2348125563943?text=I%20support%20Lagos%20Hustle%20V6">Opay: 8125563943</a></div>
+<div id="ground"></div>
+<div id="support">💛 Support Dev<br><a href="https://wa.me/2348125563943?text=I%20support%20Lagos%20Hustle%20V6%20with%20tips!">Opay: 8125563943</a></div>
 <button id="prizeBtn" onclick="claimPrize()">🎁 Claim Prize</button>
-<div id="controls"><button class="btn" onclick="jump()">JUMP</button></div>
+<div id="controls"><button class="btn" onclick="jump()">JUMP ⬆️</button></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyC7r7-cFxiZAL79q3r6u6d9o6X9v6dX8y8",
-authDomain: "lagos-hustle-a27d7.firebaseapp.com",
-projectId: "lagos-hustle-a27d7",
-storageBucket: "lagos-hustle-a27d7.appspot.com",
-messagingSenderId: "123456789",
-appId: "1:123456789:web:abcdef"
+  apiKey: "AIzaSyCdmLasZpFtzhfTjn65dyggLxsNCTkHuZI",
+  authDomain: "lagos-hustle-a27d7.firebaseapp.com",
+  projectId: "lagos-hustle-a27d7",
+  storageBucket: "lagos-hustle-a27d7.firebasestorage.app",
+  messagingSenderId: "737760929025",
+  appId: "1:737760929025:web:ab7221ad816c83accba700"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// AUTO WEEK CALCULATION - resets every Monday
+// WEEK LOGIC - AUTO RESET
 function getWeekStart(){
-let now=new Date();
-let day=now.getDay();
-let diff=now.getDate()-day+(day==0?-6:1);
-let monday=new Date(now.setDate(diff));
-monday.setHours(0,0,0,0);
-return monday;
+  let now=new Date();
+  let day=now.getDay();
+  let diff=now.getDate()-day+(day==0?-6:1);
+  let monday=new Date(now);
+  monday.setDate(diff);
+  monday.setHours(0,0,0,0);
+  return monday;
 }
 function getWeekNumber(){
-let start=new Date(new Date().getFullYear(),0,1);
-let days=Math.floor((new Date()-start)/(24*60*60*1000));
-return Math.ceil((days+start.getDay()+1)/7);
+  let now=new Date();
+  let start=new Date(now.getFullYear(),0,1);
+  let days=Math.floor((now-start)/(24*60*60*1000));
+  return Math.ceil((days+start.getDay()+1)/7);
 }
 document.getElementById('weekNum').innerText=getWeekNumber();
 let weekStart=getWeekStart();
@@ -69,84 +78,46 @@ let game=document.getElementById('game');
 let scoreEl=document.getElementById('score');
 let score=0;
 let isJumping=false;
+let gameActive=true;
 
 function jump(){
-if(isJumping) return;
-isJumping=true;
-let up=0;
-let j=setInterval(()=>{
-if(up>=120){clearInterval(j); let d=setInterval(()=>{if(up<=0){clearInterval(d);isJumping=false;} up-=10; player.style.bottom=(100+up)+'px';},20);}else{up+=10; player.style.bottom=(100+up)+'px';}
-},20);
+  if(isJumping||!gameActive) return;
+  isJumping=true;
+  let pos=0;
+  let up=setInterval(()=>{
+    if(pos>=130){clearInterval(up); let down=setInterval(()=>{if(pos<=0){clearInterval(down);isJumping=false;pos=0;}else{pos-=12;player.style.bottom=(110+pos)+'px';}},20);}
+    else{pos+=14;player.style.bottom=(110+pos)+'px';}
+  },20);
 }
 
 function createObstacle(){
-let obs=document.createElement('div');
-obs.className='obstacle';
-obs.style.left='100vw';
-game.appendChild(obs);
-let move=setInterval(()=>{
-let l=parseInt(obs.style.left);
-if(l<-50){clearInterval(move);obs.remove();}
-else{obs.style.left=(l-5)+'px';
-let pRect=player.getBoundingClientRect();
-let oRect=obs.getBoundingClientRect();
-if(!(pRect.right<oRect.left||pRect.left>oRect.right||pRect.bottom<oRect.top||pRect.top>oRect.bottom)){gameOver();clearInterval(move);}}
-},20);
+  if(!gameActive) return;
+  let obs=document.createElement('div');
+  obs.className='obstacle';
+  obs.style.left='100vw';
+  game.appendChild(obs);
+  let l=window.innerWidth;
+  let move=setInterval(()=>{
+    if(!gameActive){clearInterval(move);obs.remove();return;}
+    l-=6;
+    obs.style.left=l+'px';
+    if(l<-50){clearInterval(move);obs.remove();return;}
+    let pRect=player.getBoundingClientRect();
+    let oRect=obs.getBoundingClientRect();
+    if(!(pRect.right-10<oRect.left||pRect.left+10>oRect.right||pRect.bottom-10<oRect.top||pRect.top+10>oRect.bottom)){clearInterval(move);gameOver();}
+  },16);
 }
 
 function createCoin(){
-let coin=document.createElement('div');
-coin.className='coin';
-coin.style.left='100vw';
-coin.style.bottom=(120+Math.random()*100)+'px';
-game.appendChild(coin);
-let move=setInterval(()=>{
-let l=parseInt(coin.style.left);
-if(l<-50){clearInterval(move);coin.remove();}
-else{coin.style.left=(l-5)+'px';
-let pRect=player.getBoundingClientRect();
-let cRect=coin.getBoundingClientRect();
-if(!(pRect.right<cRect.left||pRect.left>cRect.right||pRect.bottom<cRect.top||pRect.top>cRect.bottom)){score+=10;scoreEl.innerText='₦'+score;coin.remove();clearInterval(move);}}
-},20);
-}
-
-setInterval(createObstacle,1500);
-setInterval(createCoin,1000);
-
-async function loadBoard(){
-try{
-let q=query(collection(db,"leaderboard"),orderBy("score","desc"),limit(50));
-let snap=await getDocs(q);
-let html="";
-let count=0;
-snap.forEach(doc=>{
-let d=doc.data();
-let created=d.created?d.created.toDate():new Date(0);
-if(created>=weekStart||!d.created){
-count++;
-if(count<=10) html+=`${count}. ${d.name} ₦${d.score}<br>`;
-}
-});
-if(count==0) html="No scores this week<br>Be first!";
-document.getElementById('board').innerHTML=html;
-}catch(e){document.getElementById('board').innerHTML="Offline - ₦"+score;}
-}
-
-async function gameOver(){
-let name=prompt("Game Over! You scored ₦"+score+"\nEnter name for WEEK "+getWeekNumber()+" leaderboard:");
-if(name){
-try{await addDoc(collection(db,"leaderboard"),{name:name.substring(0,12),score:score,created:serverTimestamp()});}catch(e){alert("Saved locally!");}
-}
-score=0;scoreEl.innerText='₦0';loadBoard();
-}
-
-window.claimPrize=()=>{
-let msg=`Hello! I am claiming Lagos Hustle Week ${getWeekNumber()} prize! My score is ₦${score}. Check leaderboard!`;
-window.open(`https://wa.me/2348125563943?text=${encodeURIComponent(msg)}`);
-}
-
-loadBoard();
-setInterval(loadBoard,5000);
-</script>
-</body>
-</html>
+  if(!gameActive) return;
+  let coin=document.createElement('div');
+  coin.className='coin';
+  coin.style.left='100vw';
+  coin.style.bottom=(135+Math.random()*90)+'px';
+  game.appendChild(coin);
+  let l=window.innerWidth;
+  let move=setInterval(()=>{
+    if(!gameActive){clearInterval(move);coin.remove();return;}
+    l-=5;
+    coin.style.left=l+'px';
+    if(l<-
