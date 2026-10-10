@@ -1,49 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Lagos Hustle V6.2 - With Sound</title>
+<title>Lagos Hustle - Win ₦500 Airtime Week 41</title>
+<meta name="description" content="Week 41 Tournament LIVE! Top 3 Win ₦500 Airtime Sunday 8PM. Play Lagos Danfo game free!">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Arial;background:#111;color:#fff;overflow:hidden;touch-action:none}
-#game{position:relative;width:100vw;height:100vh;background:linear-gradient(to bottom,#87CEEB 0%,#E0F6FF 60%,#F4A460 60%,#8B4513 100%);overflow:hidden}
-#player{position:absolute;width:48px;height:48px;background:#FFD700;border:3px solid #000;border-radius:50%;left:60px;bottom:110px;z-index:10;transition:bottom 0.1s}
-#player::after{content:"😎";font-size:28px;position:absolute;top:5px;left:7px}
-#ground{position:absolute;bottom:0;width:100%;height:100px;background:#333}
-#tournament{position:absolute;top:0;left:0;width:100%;background:linear-gradient(90deg,#FF6B00,#FFD700);color:#000;text-align:center;padding:10px 5px;font-weight:900;font-size:13px;z-index:100;letter-spacing:0.5px}
-#score{position:absolute;top:45px;left:10px;font-size:26px;font-weight:900;color:#000;background:rgba(255,255,255,0.9);padding:5px 12px;border-radius:20px;z-index:100}
-#leaderboard{position:absolute;top:45px;right:8px;background:rgba(0,0,0,0.88);padding:10px;border-radius:12px;min-width:175px;max-width:190px;z-index:100;font-size:12px;line-height:1.6;border:2px solid #FFD700}
-#controls{position:absolute;bottom:15px;width:100%;display:flex;justify-content:center;gap:15px;z-index:100}
-.btn{padding:18px 35px;background:linear-gradient(#FF6B00,#FF4500);color:#fff;border:3px solid #000;border-radius:15px;font-weight:900;font-size:18px;box-shadow:0 4px 0 #000}
-.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
-#support{position:absolute;bottom:85px;left:8px;background:rgba(0,0,0,0.85);padding:8px 10px;border-radius:10px;z-index:100;font-size:11px;border:1px solid #25D366}
-#support a{color:#25D366;text-decoration:none;font-weight:900}
-#prizeBtn{position:absolute;bottom:85px;right:8px;background:linear-gradient(#25D366,#128C7E);color:#fff;padding:10px 14px;border-radius:10px;border:2px solid #000;font-weight:900;z-index:100;font-size:12px}
-#soundBtn{position:absolute;top:90px;left:10px;background:rgba(0,0,0,0.8);color:#fff;padding:6px 10px;border-radius:20px;border:2px solid #fff;z-index:100;font-size:16px}
-.obstacle{position:absolute;width:38px;height:55px;background:linear-gradient(#FF0000,#8B0000);bottom:100px;border:2px solid #000;border-radius:5px}
-.obstacle::after{content:"🚧";position:absolute;top:10px;left:3px;font-size:20px}
-.coin{position:absolute;width:32px;height:32px;background:radial-gradient(#FFD700,#FFA500);border-radius:50%;bottom:130px;border:2px solid #000;display:flex;align-items:center;justify-content:center;font-size:16px}
-.coin::after{content:"₦"}
+body{margin:0;background:#0a0a0a;color:#fff;font-family:Arial;text-align:center;overflow:hidden}
+canvas{background:linear-gradient(#87CEEB 0%, #FFCC33 100%);display:block;margin:0 auto;touch-action:none;border:2px solid #ff9900}
+button{padding:14px 22px;font-size:18px;border:none;border-radius:10px;background:#ff9900;color:#000;font-weight:bold;margin:5px}
+#board{background:#111;padding:12px;margin:10px;border-radius:12px;border:1px solid #ff9900;max-height:220px;overflow:auto}
+h2{margin:8px;color:#ff9900}
 </style>
 </head>
 <body>
-<div id="game">
-<div id="tournament">🏆 WEEK <span id="weekNum">1</span> TOURNAMENT - TOP 3 WIN ₦500 AIRTIME SUN 8PM!</div>
-<div id="score">₦0</div>
-<button id="soundBtn" onclick="toggleSound()">🔊</button>
-<div id="leaderboard"><b>🔥 THIS WEEK BOARD</b><div id="board" style="margin-top:6px">Loading...</div><div style="margin-top:6px;font-size:10px;opacity:0.7">Resets Mon 12AM</div></div>
-<div id="player"></div>
-<div id="ground"></div>
-<div id="support">💛 Support Dev<br><a href="https://wa.me/2348125563943?text=I%20support%20Lagos%20Hustle%20V6%20with%20tips!">Opay: 8125563943</a></div>
-<button id="prizeBtn" onclick="claimPrize()">🎁 Claim Prize</button>
-<div id="controls"><button class="btn" onclick="jump()">JUMP ⬆️</button></div>
+<h2>🔥 LAGOS HUSTLE - WEEK 41 🏆</h2>
+<canvas id="g" width="360" height="520"></canvas>
+<div>
+<button onclick="jump()">JUMP ⬆️</button>
+<button id="snd" onclick="toggleSound()">🔊</button>
+</div>
+<p>Score: ₦<span id="s">0</span> | Best: ₦<span id="h">0</span></p>
+<div id="board">
+<h3 style="margin:5px">🌍 GLOBAL LEADERBOARD - TOP 3 WIN ₦500</h3>
+<div id="list">Loading global scores... 🌍</div>
+<button onclick="claim()" style="background:#25D366;color:#fff;margin-top:8px">Claim Prize - WhatsApp 📲</button>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
+<script>
+// YOUR REAL FIREBASE CONFIG - WEEK 41
 const firebaseConfig = {
   apiKey: "AIzaSyCdmLasZpFtzhfTjn65dyggLxsNCTkHuZI",
   authDomain: "lagos-hustle-a27d7.firebaseapp.com",
@@ -52,127 +39,76 @@ const firebaseConfig = {
   messagingSenderId: "737760929025",
   appId: "1:737760929025:web:ab7221ad816c83accba700"
 };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-// --- SOUND SYSTEM ---
-let audioCtx=null;
-let soundOn=true;
-function initAudio(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }
-function playTone(freq,type,dur,vol=0.3){
-  if(!soundOn) return;
-  initAudio();
-  const o=audioCtx.createOscillator();
-  const g=audioCtx.createGain();
-  o.type=type; o.frequency.value=freq;
-  o.connect(g); g.connect(audioCtx.destination);
-  g.gain.setValueAtTime(vol, audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+dur);
-  o.start(); o.stop(audioCtx.currentTime+dur);
-}
-function playJump(){ playTone(300,'square',0.15,0.4); setTimeout(()=>playTone(600,'square',0.15,0.4),80); }
-function playCoin(){ playTone(800,'sine',0.2,0.5); setTimeout(()=>playTone(1200,'sine',0.3,0.5),100); }
-function playGameOver(){ playTone(200,'sawtooth',0.4,0.5); setTimeout(()=>playTone(100,'sawtooth',0.6,0.5),150); }
-window.toggleSound=()=>{
-  soundOn=!soundOn;
-  document.getElementById('soundBtn').innerText=soundOn?'🔊':'🔇';
-  if(soundOn){initAudio(); playCoin();}
-};
+// Game vars
+let c=document.getElementById("g"),ctx=c.getContext("2d");
+let y=260,vy=0,score=0,high=parseInt(localStorage.getItem("lagos_high")||"0"),muted=false,gameOver=false;
+let obs=[],coins=[],frame=0;
+document.getElementById("h").innerText=high;
+let audioCtx;
+function getAudio(){if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); return audioCtx;}
+function beep(f,d,t){if(muted) return; try{let ac=getAudio(); let o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.type=t||'sine';o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(0.3,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+d);o.start();o.stop(ac.currentTime+d);}catch(e){}}
+function toggleSound(){muted=!muted;document.getElementById("snd").innerText=muted?'🔇':'🔊'; if(!muted) getAudio().resume();}
+function claim(){let m=encodeURIComponent("I won Lagos Hustle Week 41! My best: ₦"+high+" - Claim ₦500 airtime! My name: "+(localStorage.getItem("playerName")||"player")); window.open("https://wa.me/2348123456789?text="+m);}
 
-// --- WEEK LOGIC ---
-function getWeekStart(){
-  let now=new Date();
-  let day=now.getDay();
-  let diff=now.getDate()-day+(day==0?-6:1);
-  let monday=new Date(now); monday.setDate(diff); monday.setHours(0,0,0,0);
-  return monday;
+function saveGlobal(){
+  let name=localStorage.getItem("playerName")||prompt("Enter your name for GLOBAL board:")||"Anon";
+  localStorage.setItem("playerName",name);
+  db.collection("scores").add({name:name,score:high,created:firebase.firestore.FieldValue.serverTimestamp()}).then(()=>{loadGlobal();});
 }
-function getWeekNumber(){
-  let now=new Date();
-  let start=new Date(now.getFullYear(),0,1);
-  let days=Math.floor((now-start)/(24*60*60*1000));
-  return Math.ceil((days+start.getDay()+1)/7);
+function loadGlobal(){
+  db.collection("scores").orderBy("score","desc").limit(10).onSnapshot(snap=>{
+    let arr=[]; snap.forEach(doc=>arr.push(doc.data()));
+    if(arr.length==0){document.getElementById("list").innerHTML="No scores yet - be FIRST! 🚀"; return;}
+    let html=""; arr.slice(0,5).forEach((p,i)=>{
+      let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":`${i+1}.`;
+      html+=`${medal} ${p.name} - ₦${p.score}<br>`;
+    });
+    document.getElementById("list").innerHTML=html;
+  });
 }
-document.getElementById('weekNum').innerText=getWeekNumber();
-let weekStart=getWeekStart();
 
-let player=document.getElementById('player');
-let game=document.getElementById('game');
-let scoreEl=document.getElementById('score');
-let score=0; let isJumping=false; let gameActive=true;
+function reset(){y=260;vy=0;score=0;obs=[];coins=[];gameOver=false;document.getElementById("s").innerText=0;}
 
-function jump(){
-  if(isJumping||!gameActive) return;
-  playJump();
-  isJumping=true;
-  let pos=0;
-  let up=setInterval(()=>{
-    if(pos>=130){clearInterval(up); let down=setInterval(()=>{if(pos<=0){clearInterval(down);isJumping=false;pos=0;}else{pos-=12;player.style.bottom=(110+pos)+'px';}},20);}
-    else{pos+=14;player.style.bottom=(110+pos)+'px';}
-  },20);
+function loop(){
+  if(gameOver) return;
+  frame++; vy+=0.55; y+=vy;
+  if(y>500){y=500; vy=0;}
+  if(y<0) y=0;
+  
+  ctx.clearRect(0,0,360,520);
+  // ground
+  ctx.fillStyle="#333"; ctx.fillRect(0,500,360,20);
+  
+  // player
+  ctx.fillStyle="#000"; ctx.fillRect(30,y,22,22);
+  ctx.fillStyle="#ff0"; ctx.fillRect(32,y+4,6,6);
+  
+  // obstacles
+  if(frame%90==0) obs.push({x:360,y:470});
+  obs.forEach((o,i)=>{
+    o.x-=4; ctx.fillStyle="#ff3300"; ctx.fillRect(o.x,o.y,26,30);
+    if(o.x<52&&o.x>8&&y>440){ gameOver=true; if(score>high){high=score; localStorage.setItem("lagos_high",high); document.getElementById("h").innerText=high; saveGlobal();} beep(120,0.6,'sawtooth'); setTimeout(()=>{alert("Game Over! Score ₦"+score+"\nGlobal board updated!"); reset(); loop();},150); }
+    if(o.x<-30) obs.splice(i,1);
+  });
+  
+  // coins
+  if(frame%70==0) coins.push({x:360,y:Math.random()*350+50});
+  coins.forEach((co,i)=>{
+    co.x-=4; ctx.fillStyle="gold"; ctx.beginPath(); ctx.arc(co.x,co.y,11,0,Math.PI*2); ctx.fill(); ctx.fillStyle="#000"; ctx.font="bold 12px Arial"; ctx.fillText("₦",co.x-4,co.y+4);
+    if(Math.abs(co.x-41)<20&&Math.abs(co.y-y)<20){ score+=10; document.getElementById("s").innerText=score; coins.splice(i,1); beep(900,0.12); beep(1200,0.12); }
+    if(co.x<-20) coins.splice(i,1);
+  });
+  
+  requestAnimationFrame(loop);
 }
-document.addEventListener('touchstart', jump);
-document.addEventListener('keydown', (e)=>{if(e.code==='Space') jump();});
 
-function createObstacle(){
-  if(!gameActive) return;
-  let obs=document.createElement('div'); obs.className='obstacle'; obs.style.left='100vw'; game.appendChild(obs);
-  let l=window.innerWidth;
-  let move=setInterval(()=>{
-    if(!gameActive){clearInterval(move);obs.remove();return;}
-    l-=6; obs.style.left=l+'px';
-    if(l<-50){clearInterval(move);obs.remove();return;}
-    let pRect=player.getBoundingClientRect(); let oRect=obs.getBoundingClientRect();
-    if(!(pRect.right-10<oRect.left||pRect.left+10>oRect.right||pRect.bottom-10<oRect.top||pRect.top+10>oRect.bottom)){clearInterval(move);gameOver();}
-  },16);
-}
-function createCoin(){
-  if(!gameActive) return;
-  let coin=document.createElement('div'); coin.className='coin'; coin.style.left='100vw'; coin.style.bottom=(135+Math.random()*90)+'px'; game.appendChild(coin);
-  let l=window.innerWidth;
-  let move=setInterval(()=>{
-    if(!gameActive){clearInterval(move);coin.remove();return;}
-    l-=5; coin.style.left=l+'px';
-    if(l<-60){clearInterval(move);coin.remove();return;}
-    let pRect=player.getBoundingClientRect(); let cRect=coin.getBoundingClientRect();
-    if(!(pRect.right-10<cRect.left||pRect.left+10>cRect.right||pRect.bottom-10<cRect.top||pRect.top+10>cRect.bottom)){
-      playCoin();
-      score+=10; scoreEl.innerText='₦'+score;
-      clearInterval(move); coin.remove();
-    }
-  },16);
-}
-async function loadBoard(){
-  let board=document.getElementById('board');
-  try{
-    const snap=await getDocs(collection(db,"scores"));
-    let all=[]; snap.forEach(doc=>{ let d=doc.data(); if(d.timestamp){ let t=d.timestamp.toDate ? d.timestamp.toDate() : new Date(d.timestamp); if(t>=weekStart) all.push(d); }else{ all.push(d); } });
-    all.sort((a,b)=>b.score-a.score); all=all.slice(0,5);
-    if(all.length===0){board.innerHTML="No scores yet - Be first!"; return;}
-    board.innerHTML=all.map((s,i)=>`${i+1}. ${s.name} - ₦${s.score}`).join('<br>');
-  }catch(e){ board.innerHTML="No scores yet - Be first!"; }
-}
-async function saveScore(name){
-  try{ await addDoc(collection(db,"scores"),{name:name, score:score, timestamp:serverTimestamp()}); }catch(e){ alert("Save failed: "+e.message); }
-  loadBoard();
-}
-function gameOver(){
-  gameActive=false; playGameOver();
-  setTimeout(async ()=>{
-    let name=prompt("Game Over! Your score: ₦"+score+"\nEnter name for leaderboard:");
-    if(name){ await saveScore(name.substring(0,12)); }
-    score=0; scoreEl.innerText='₦0';
-    document.querySelectorAll('.obstacle,.coin').forEach(el=>el.remove());
-    gameActive=true; loadBoard();
-  },200);
-}
-function claimPrize(){ window.open("https://wa.me/2348125563943?text=I%20won%20Lagos%20Hustle%20Week%20"+getWeekNumber()+"%20with%20score%20%E2%82%A6"+score,"_blank"); }
-window.claimPrize=claimPrize;
-
-loadBoard();
-setInterval(createObstacle,1500);
-setInterval(createCoin,1000);
-setInterval(loadBoard,10000);
+loadGlobal(); loop();
+c.addEventListener("touchstart",e=>{e.preventDefault(); if(audioCtx==undefined) getAudio(); jump();},{passive:false});
+function jump(){ if(gameOver){reset(); loop(); return;} vy=-11; beep(500,0.1,'square'); }
+document.addEventListener("keydown",e=>{if(e.code==="Space"){jump();}});
 </script>
 </body>
 </html>
