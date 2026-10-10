@@ -2,172 +2,161 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lagos Hustle - Global Leaderboard</title>
-
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-0294J85BMB"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-0294J85BMB');
-</script>
-
-<!-- Firebase SDK -->
-<script type="importmap">
-{
-  "imports": {
-    "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
-    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
-  }
-}
-</script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Lagos Hustle - Global Edition</title>
 <style>
-  body { margin:0; background:#0f0f0f; color:white; font-family: 'Segoe UI', sans-serif; text-align:center; }
-  #game { padding:20px; }
-  canvas { background:#1a1a1a; border:2px solid #ffcc00; border-radius:10px; max-width:100%; }
-  .stats { font-size:22px; margin:15px; color:#ffcc00; }
-  button { background:#ffcc00; color:#000; border:none; padding:12px 25px; font-size:18px; font-weight:bold; border-radius:8px; cursor:pointer; margin:10px; }
-  #leaderboard { background:#222; max-width:400px; margin:20px auto; padding:15px; border-radius:10px; text-align:left; }
-  #leaderboard h2 { text-align:center; color:#ffcc00; }
-  .entry { padding:8px; border-bottom:1px solid #333; display:flex; justify-content:space-between; }
-  .entry.top1 { color:gold; font-weight:bold; }
-  input { padding:10px; border-radius:5px; border:none; width:70%; font-size:16px; }
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#0a0a0a;color:#fff;font-family:'Inter',sans-serif;overflow:hidden;touch-action:none}
+#gameWrap{position:relative;width:100vw;height:100vh;display:flex;flex-direction:column;background:radial-gradient(circle at 50% 0%, #1a3a2a 0%, #0a0a0a 70%)}
+#header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;z-index:10}
+.logo{font-family:'Bebas Neue';font-size:28px;letter-spacing:2px}
+.logo span{color:#00ff88}
+#scoreBox{font-weight:900;font-size:18px;background:#111;padding:8px 14px;border-radius:20px;border:1px solid #222}
+canvas{flex:1;width:100%;display:block}
+#controls{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;padding:16px;pointer-events:none;z-index:10}
+.btn{pointer-events:auto;width:72px;height:72px;border-radius:50%;background:#ffffff12;border:2px solid #ffffff22;backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;font-size:28px;user-select:none}
+.btn:active{transform:scale(0.9);background:#00ff8822}
+#overlay{position:absolute;inset:0;background:#000e;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;padding:24px;text-align:center}
+h1{font-family:'Bebas Neue';font-size:56px;line-height:0.9;margin-bottom:12px}
+h1 span{color:#00ff88}
+p{opacity:0.7;margin-bottom:20px;max-width:320px;line-height:1.4}
+.inputRow{display:flex;gap:8px;width:100%;max-width:320px;margin-bottom:16px}
+input{flex:1;background:#111;border:1px solid #333;border-radius:12px;padding:14px;color:#fff;font-weight:700;outline:none}
+#mainBtn{background:#00ff88;color:#000;border:none;padding:16px 36px;border-radius:100px;font-weight:900;font-size:18px;letter-spacing:1px;width:100%;max-width:320px}
+#leaderboard{width:100%;max-width:360px;margin-top:20px;background:#111;border:1px solid #222;border-radius:16px;padding:12px;max-height:40vh;overflow:auto}
+.lb-row{display:flex;justify-content:space-between;padding:8px 12px;border-radius:10px;font-size:14px}
+.lb-row:nth-child(1){background:#00ff8822;font-weight:900}
+.lb-row.me{background:#fff1;border:1px dashed #00ff88}
+.small{font-size:12px;opacity:0.5;margin-top:8px}
+#jumpHint{position:absolute;top:60px;width:100%;text-align:center;opacity:0.5;font-size:12px;letter-spacing:2px;pointer-events:none}
 </style>
 </head>
 <body>
+<div id="gameWrap">
+<div id="header"><div class="logo">LAGOS <span>HUSTLE</span></div><div id="scoreBox">₦0</div></div>
+<div id="jumpHint">TAP TO JUMP • DODGE DANFO</div>
+<canvas id="c"></canvas>
+<div id="controls"><div class="btn" id="leftBtn">←</div><div class="btn" id="jumpBtn">↑</div><div class="btn" id="rightBtn">→</div></div>
 
-<div id="game">
-  <h1>🇳🇬 LAGOS HUSTLE</h1>
-  <div class="stats">Cash: ₦<span id="cash">0</span> | Level: <span id="level">1</span></div>
-  <canvas id="gameCanvas" width="400" height="600"></canvas>
-  <div>
-    <button onclick="tapHustle()">HUSTLE 💰</button>
-    <button onclick="resetGame()">Reset</button>
-  </div>
-
-  <div id="saveScoreBox" style="display:none; background:#222; padding:15px; max-width:400px; margin:20px auto; border-radius:10px;">
-    <h3>Game Over! Save Your Score</h3>
-    <input id="playerName" placeholder="Enter your name (e.g. Star)" maxlength="15">
-    <button onclick="saveGlobalScore()">Save to Global Leaderboard 🌍</button>
-  </div>
-
-  <div id="leaderboard">
-    <h2>🏆 GLOBAL TOP 10</h2>
-    <div id="leaderboardList">Loading global hustlers...</div>
-  </div>
+<div id="overlay">
+<h1>LAGOS<br><span>HUSTLE</span></h1>
+<p>Dodge danfo, grab cash, hustle never stops. Global leaderboard live!</p>
+<div class="inputRow"><input id="nameInput" placeholder="Your street name e.g. Seyi" maxlength="12"></div>
+<button id="mainBtn">START HUSTLE</button>
+<div id="leaderboard"><div style="opacity:0.5;text-align:center;padding:12px">Loading global scores...</div></div>
+<div class="small">Global leaderboard • Firestore live • lagos-hustle-a27d7</div>
+</div>
 </div>
 
 <script type="module">
-  import { initializeApp } from "firebase/app";
-  import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } from "firebase/firestore";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // YOUR FIREBASE CONFIG
-  const firebaseConfig = {
-    apiKey: "AIzaSyCdmLasZpFtzhfTjn65dyggLxsNCTkHuZI",
-    authDomain: "lagos-hustle-a27d7.firebaseapp.com",
-    projectId: "lagos-hustle-a27d7",
-    storageBucket: "lagos-hustle-a27d7.firebasestorage.app",
-    messagingSenderId: "737760929025",
-    appId: "1:737760929025:web:ab7221ad816c83accba700"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyCdmLasZpFtzhfTjn65dyggLxsNCTkHuZI",
+  authDomain: "lagos-hustle-a27d7.firebaseapp.com",
+  projectId: "lagos-hustle-a27d7",
+  storageBucket: "lagos-hustle-a27d7.firebasestorage.app",
+  messagingSenderId: "737760929025",
+  appId: "1:737760929025:web:ab7221ad816c83accba700"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const lbRef = collection(db, "leaderboard");
 
-  // GAME LOGIC
-  let cash = parseInt(localStorage.getItem('cash')) || 0;
-  let level = 1;
-  let gameActive = true;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W,H;
+function resize(){W=canvas.width=canvas.clientWidth*2;H=canvas.height=canvas.clientHeight*2;}
+window.addEventListener('resize',resize);resize();
+const overlay=document.getElementById('overlay');
+const scoreBox=document.getElementById('scoreBox');
+const nameInput=document.getElementById('nameInput');
+const mainBtn=document.getElementById('mainBtn');
+const lbDiv=document.getElementById('leaderboard');
+let gameState='menu', score=0, highScore=0, player, obstacles, cash, speed, frame;
 
-  const cashEl = document.getElementById('cash');
-  const levelEl = document.getElementById('level');
-  const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
-
-  function updateUI() {
-    cashEl.textContent = cash.toLocaleString();
-    levelEl.textContent = level;
-    localStorage.setItem('cash', cash);
-    draw();
+class Player{
+  constructor(){this.w=36;this.h=48;this.x=W/2-this.w/2;this.y=H-200;this.vy=0;this.onGround=true;this.lane=1;}
+  update(){
+    if(!this.onGround){this.vy+=2.2;this.y+=this.vy;if(this.y>=H-200){this.y=H-200;this.vy=0;this.onGround=true;}}
+    const targetX = (W/3)*this.lane + W/6 - this.w/2;
+    this.x += (targetX - this.x)*0.25;
   }
-
-  function draw() {
-    ctx.clearRect(0,0,400,600);
-    ctx.fillStyle = "#ffcc00";
-    ctx.font = "60px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("💰", 200, 300);
-    ctx.font = "20px Arial";
-    ctx.fillText(`₦${cash.toLocaleString()}`, 200, 350);
+  jump(){if(this.onGround){this.vy=-32;this.onGround=false;}}
+  draw(){
+    ctx.save();
+    ctx.translate(this.x+this.w/2,this.y+this.h/2);
+    ctx.fillStyle='#00ff88';ctx.fillRect(-this.w/2,-this.h/2,this.w,this.h);
+    ctx.fillStyle='#000';ctx.fillRect(-8,-12,16,8);
+    ctx.restore();
   }
-
-  window.tapHustle = () => {
-    if(!gameActive) return;
-    cash += 100 * level;
-    if(cash > level * 5000) level++;
-    gtag('event', 'hustle_tap', { value: cash });
-    updateUI();
-    if(cash > 50000 && gameActive) {
-      gameActive = false;
-      document.getElementById('saveScoreBox').style.display = 'block';
-    }
-  }
-
-  window.resetGame = () => {
-    cash = 0; level = 1; gameActive = true;
-    document.getElementById('saveScoreBox').style.display = 'none';
-    updateUI();
-  }
-
-  // GLOBAL LEADERBOARD
-  async function loadLeaderboard() {
-    const list = document.getElementById('leaderboardList');
-    try {
-      const q = query(collection(db, "leaderboard"), orderBy("cash", "desc"), limit(10));
-      const snapshot = await getDocs(q);
-      list.innerHTML = "";
-      let rank = 1;
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const div = document.createElement('div');
-        div.className = `entry ${rank===1?'top1':''}`;
-        div.innerHTML = `<span>${rank}. ${data.name}</span><span>₦${data.cash.toLocaleString()}</span>`;
-        list.appendChild(div);
-        rank++;
-      });
-      if(rank===1) list.innerHTML = "No scores yet. Be the first!";
-    } catch(e) {
-      list.innerHTML = "Error loading leaderboard. Check Firestore rules.";
-      console.error(e);
-    }
-  }
-
-  window.saveGlobalScore = async () => {
-    const name = document.getElementById('playerName').value.trim() || "Anonymous";
-    if(cash===0) return alert("No cash to save!");
-    try {
-      await addDoc(collection(db, "leaderboard"), {
-        name: name,
-        cash: cash,
-        createdAt: serverTimestamp()
-      });
-      gtag('event', 'save_global_score', { player: name, cash: cash });
-      alert(`Saved! ${name} - ₦${cash.toLocaleString()} to global board!`);
-      document.getElementById('saveScoreBox').style.display = 'none';
-      loadLeaderboard();
-      resetGame();
-    } catch(e) {
-      alert("Failed to save. Make sure Firestore is in test mode.");
-      console.error(e);
-    }
-  }
-
-  // Init
-  updateUI();
-  loadLeaderboard();
+}
+function spawnOb(){const lane=Math.floor(Math.random()*3);obstacles.push({x:(W/3)*lane+W/6-30,y:-80,w:60,h:40,type:Math.random()>0.5?'danfo':'pothole'});}
+function spawnCash(){const lane=Math.floor(Math.random()*3);cash.push({x:(W/3)*lane+W/6-15,y:-60,w:30,h:30,got:false});}
+function loop(){
+  if(gameState!=='play')return;
+  frame++;ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#111';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#222';for(let i=0;i<3;i++){ctx.beginPath();ctx.setLineDash([20,20]);ctx.moveTo((W/3)*(i+1),0);ctx.lineTo((W/3)*(i+1),H);ctx.stroke();}
+  ctx.setLineDash([]);
+  if(frame%55===0)spawnOb();
+  if(frame%30===0)spawnCash();
+  speed+=0.01;score+=1;scoreBox.textContent='₦'+score;
+  player.update();player.draw();
+  for(let i=obstacles.length-1;i>=0;i--){let o=obstacles[i];o.y+=6+speed;ctx.fillStyle=o.type==='danfo'?'#ffcc00':'#333';ctx.fillRect(o.x,o.y,o.w,o.h);if(o.type==='danfo'){ctx.fillStyle='#000';ctx.fillRect(o.x+5,o.y+5,o.w-10,10);} if(o.y>H){obstacles.splice(i,1);continue;} if(o.x<player.x+player.w&&o.x+o.w>player.x&&o.y<player.y+player.h&&o.y+o.h>player.y){endGame();return;}}
+  for(let i=cash.length-1;i>=0;i--){let c=cash[i];c.y+=6+speed;if(!c.got){ctx.fillStyle='#00ff88';ctx.beginPath();ctx.arc(c.x+c.w/2,c.y+c.h/2,14,0,Math.PI*2);ctx.fill();ctx.fillStyle='#000';ctx.font='bold 14px Inter';ctx.fillText('₦',c.x+8,c.y+19);} if(c.y>H){cash.splice(i,1);continue;} if(c.x<player.x+player.w&&c.x+c.w>player.x&&c.y<player.y+player.h&&c.y+c.h>player.y){score+=100;c.got=true;cash.splice(i,1);}}
+  requestAnimationFrame(loop);
+}
+async function loadLeaderboard(meScore=null, meName=null){
+  try{
+    const q=query(lbRef, orderBy('score','desc'), limit(20));
+    const snap=await getDocs(q);
+    let html='';
+    let rank=1;
+    snap.forEach(doc=>{
+      const d=doc.data();
+      const isMe = meScore!==null && d.name===meName && d.score===meScore;
+      html+=`<div class="lb-row ${isMe?'me':''}"><span>${rank}. ${d.name||'Anon'}</span><span>₦${d.score}</span></div>`;
+      rank++;
+    });
+    if(!html)html='<div style="opacity:0.5;text-align:center">No scores yet. Be first!</div>';
+    lbDiv.innerHTML=html;
+  }catch(e){lbDiv.innerHTML='<div style="opacity:0.5">Offline: '+e.message+'</div>';}
+}
+async function saveScore(name,scoreVal){
+  try{await addDoc(lbRef,{name:name.slice(0,12)||'Anon',score:scoreVal,created:serverTimestamp()});}catch(e){console.log(e);}
+}
+async function endGame(){
+  gameState='over';
+  if(score>highScore)highScore=score;
+  const name=nameInput.value||'Anon';
+  overlay.style.display='flex';
+  document.querySelector('#overlay h1').innerHTML=`YOU HUSTLED<br><span>₦${score}</span>`;
+  document.querySelector('#overlay p').textContent= score>1000?'Street legend! Saving to global board...':'Omo! Danfo jam you. Saving score...';
+  mainBtn.textContent='HUSTLE AGAIN';
+  if(score>20){await saveScore(name,score);}
+  await loadLeaderboard(score,name);
+}
+function startGame(){
+  if(!nameInput.value){nameInput.style.borderColor='#f55';nameInput.placeholder='Enter your name first!';return;}
+  localStorage.setItem('lagos_name',nameInput.value);
+  score=0;speed=0;frame=0;obstacles=[];cash=[];player=new Player();
+  gameState='play';overlay.style.display='none';
+  loop();
+}
+mainBtn.addEventListener('click',startGame);
+document.getElementById('jumpBtn').addEventListener('touchstart',e=>{e.preventDefault();if(gameState==='play')player?.jump();});
+document.getElementById('jumpBtn').addEventListener('click',()=>{if(gameState==='play')player?.jump();});
+document.getElementById('leftBtn').addEventListener('touchstart',e=>{e.preventDefault();if(player)player.lane=Math.max(0,player.lane-1);});
+document.getElementById('rightBtn').addEventListener('touchstart',e=>{e.preventDefault();if(player)player.lane=Math.min(2,player.lane+1);});
+document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp')player?.jump();if(e.code==='ArrowLeft')player.lane=Math.max(0,player.lane-1);if(e.code==='ArrowRight')player.lane=Math.min(2,player.lane+1);});
+canvas.addEventListener('touchstart',e=>{if(gameState==='play')player?.jump();});
+canvas.addEventListener('click',e=>{if(gameState==='play')player?.jump();});
+loadLeaderboard();
+nameInput.value=localStorage.getItem('lagos_name')||'';
 </script>
 </body>
 </html>
