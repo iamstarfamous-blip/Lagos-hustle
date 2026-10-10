@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Lagos Hustle V6.1 - Weekly Auto Reset</title>
+<title>Lagos Hustle V6.2 - With Sound</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:Arial;background:#111;color:#fff;overflow:hidden;touch-action:none}
@@ -20,6 +20,7 @@ body{font-family:Arial;background:#111;color:#fff;overflow:hidden;touch-action:n
 #support{position:absolute;bottom:85px;left:8px;background:rgba(0,0,0,0.85);padding:8px 10px;border-radius:10px;z-index:100;font-size:11px;border:1px solid #25D366}
 #support a{color:#25D366;text-decoration:none;font-weight:900}
 #prizeBtn{position:absolute;bottom:85px;right:8px;background:linear-gradient(#25D366,#128C7E);color:#fff;padding:10px 14px;border-radius:10px;border:2px solid #000;font-weight:900;z-index:100;font-size:12px}
+#soundBtn{position:absolute;top:90px;left:10px;background:rgba(0,0,0,0.8);color:#fff;padding:6px 10px;border-radius:20px;border:2px solid #fff;z-index:100;font-size:16px}
 .obstacle{position:absolute;width:38px;height:55px;background:linear-gradient(#FF0000,#8B0000);bottom:100px;border:2px solid #000;border-radius:5px}
 .obstacle::after{content:"🚧";position:absolute;top:10px;left:3px;font-size:20px}
 .coin{position:absolute;width:32px;height:32px;background:radial-gradient(#FFD700,#FFA500);border-radius:50%;bottom:130px;border:2px solid #000;display:flex;align-items:center;justify-content:center;font-size:16px}
@@ -28,8 +29,9 @@ body{font-family:Arial;background:#111;color:#fff;overflow:hidden;touch-action:n
 </head>
 <body>
 <div id="game">
-<div id="tournament">🏆 WEEK <span id="weekNum">1</span> TOURNAMENT - TOP 3 WIN ₦500 AIRTIME SUNDAY 8PM! AUTO RESET MONDAY!</div>
+<div id="tournament">🏆 WEEK <span id="weekNum">1</span> TOURNAMENT - TOP 3 WIN ₦500 AIRTIME SUN 8PM!</div>
 <div id="score">₦0</div>
+<button id="soundBtn" onclick="toggleSound()">🔊</button>
 <div id="leaderboard"><b>🔥 THIS WEEK BOARD</b><div id="board" style="margin-top:6px">Loading...</div><div style="margin-top:6px;font-size:10px;opacity:0.7">Resets Mon 12AM</div></div>
 <div id="player"></div>
 <div id="ground"></div>
@@ -50,17 +52,39 @@ const firebaseConfig = {
   messagingSenderId: "737760929025",
   appId: "1:737760929025:web:ab7221ad816c83accba700"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// --- SOUND SYSTEM ---
+let audioCtx=null;
+let soundOn=true;
+function initAudio(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }
+function playTone(freq,type,dur,vol=0.3){
+  if(!soundOn) return;
+  initAudio();
+  const o=audioCtx.createOscillator();
+  const g=audioCtx.createGain();
+  o.type=type; o.frequency.value=freq;
+  o.connect(g); g.connect(audioCtx.destination);
+  g.gain.setValueAtTime(vol, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+dur);
+  o.start(); o.stop(audioCtx.currentTime+dur);
+}
+function playJump(){ playTone(300,'square',0.15,0.4); setTimeout(()=>playTone(600,'square',0.15,0.4),80); }
+function playCoin(){ playTone(800,'sine',0.2,0.5); setTimeout(()=>playTone(1200,'sine',0.3,0.5),100); }
+function playGameOver(){ playTone(200,'sawtooth',0.4,0.5); setTimeout(()=>playTone(100,'sawtooth',0.6,0.5),150); }
+window.toggleSound=()=>{
+  soundOn=!soundOn;
+  document.getElementById('soundBtn').innerText=soundOn?'🔊':'🔇';
+  if(soundOn){initAudio(); playCoin();}
+};
+
+// --- WEEK LOGIC ---
 function getWeekStart(){
   let now=new Date();
   let day=now.getDay();
   let diff=now.getDate()-day+(day==0?-6:1);
-  let monday=new Date(now);
-  monday.setDate(diff);
-  monday.setHours(0,0,0,0);
+  let monday=new Date(now); monday.setDate(diff); monday.setHours(0,0,0,0);
   return monday;
 }
 function getWeekNumber(){
@@ -75,12 +99,11 @@ let weekStart=getWeekStart();
 let player=document.getElementById('player');
 let game=document.getElementById('game');
 let scoreEl=document.getElementById('score');
-let score=0;
-let isJumping=false;
-let gameActive=true;
+let score=0; let isJumping=false; let gameActive=true;
 
 function jump(){
   if(isJumping||!gameActive) return;
+  playJump();
   isJumping=true;
   let pos=0;
   let up=setInterval(()=>{
@@ -93,97 +116,58 @@ document.addEventListener('keydown', (e)=>{if(e.code==='Space') jump();});
 
 function createObstacle(){
   if(!gameActive) return;
-  let obs=document.createElement('div');
-  obs.className='obstacle';
-  obs.style.left='100vw';
-  game.appendChild(obs);
+  let obs=document.createElement('div'); obs.className='obstacle'; obs.style.left='100vw'; game.appendChild(obs);
   let l=window.innerWidth;
   let move=setInterval(()=>{
     if(!gameActive){clearInterval(move);obs.remove();return;}
-    l-=6;
-    obs.style.left=l+'px';
+    l-=6; obs.style.left=l+'px';
     if(l<-50){clearInterval(move);obs.remove();return;}
-    let pRect=player.getBoundingClientRect();
-    let oRect=obs.getBoundingClientRect();
+    let pRect=player.getBoundingClientRect(); let oRect=obs.getBoundingClientRect();
     if(!(pRect.right-10<oRect.left||pRect.left+10>oRect.right||pRect.bottom-10<oRect.top||pRect.top+10>oRect.bottom)){clearInterval(move);gameOver();}
   },16);
 }
-
 function createCoin(){
   if(!gameActive) return;
-  let coin=document.createElement('div');
-  coin.className='coin';
-  coin.style.left='100vw';
-  coin.style.bottom=(135+Math.random()*90)+'px';
-  game.appendChild(coin);
+  let coin=document.createElement('div'); coin.className='coin'; coin.style.left='100vw'; coin.style.bottom=(135+Math.random()*90)+'px'; game.appendChild(coin);
   let l=window.innerWidth;
   let move=setInterval(()=>{
     if(!gameActive){clearInterval(move);coin.remove();return;}
-    l-=5;
-    coin.style.left=l+'px';
+    l-=5; coin.style.left=l+'px';
     if(l<-60){clearInterval(move);coin.remove();return;}
-    let pRect=player.getBoundingClientRect();
-    let cRect=coin.getBoundingClientRect();
+    let pRect=player.getBoundingClientRect(); let cRect=coin.getBoundingClientRect();
     if(!(pRect.right-10<cRect.left||pRect.left+10>cRect.right||pRect.bottom-10<cRect.top||pRect.top+10>cRect.bottom)){
-      score+=10;
-      scoreEl.innerText='₦'+score;
-      clearInterval(move);
-      coin.remove();
+      playCoin();
+      score+=10; scoreEl.innerText='₦'+score;
+      clearInterval(move); coin.remove();
     }
   },16);
 }
-
 async function loadBoard(){
   let board=document.getElementById('board');
   try{
     const snap=await getDocs(collection(db,"scores"));
-    let all=[];
-    snap.forEach(doc=>{
-      let d=doc.data();
-      if(d.timestamp){
-        let t=d.timestamp.toDate ? d.timestamp.toDate() : new Date(d.timestamp);
-        if(t>=weekStart) all.push(d);
-      }else{
-        all.push(d);
-      }
-    });
-    all.sort((a,b)=>b.score-a.score);
-    all=all.slice(0,5);
+    let all=[]; snap.forEach(doc=>{ let d=doc.data(); if(d.timestamp){ let t=d.timestamp.toDate ? d.timestamp.toDate() : new Date(d.timestamp); if(t>=weekStart) all.push(d); }else{ all.push(d); } });
+    all.sort((a,b)=>b.score-a.score); all=all.slice(0,5);
     if(all.length===0){board.innerHTML="No scores yet - Be first!"; return;}
     board.innerHTML=all.map((s,i)=>`${i+1}. ${s.name} - ₦${s.score}`).join('<br>');
-  }catch(e){
-    console.log("Board error",e);
-    board.innerHTML="No scores yet - Be first!<br><small style='opacity:0.6'>"+e.message.slice(0,30)+"</small>";
-  }
+  }catch(e){ board.innerHTML="No scores yet - Be first!"; }
 }
-
 async function saveScore(name){
-  try{
-    await addDoc(collection(db,"scores"),{name:name, score:score, timestamp:serverTimestamp()});
-  }catch(e){
-    alert("Save failed: "+e.message);
-  }
+  try{ await addDoc(collection(db,"scores"),{name:name, score:score, timestamp:serverTimestamp()}); }catch(e){ alert("Save failed: "+e.message); }
   loadBoard();
 }
-
 function gameOver(){
-  gameActive=false;
+  gameActive=false; playGameOver();
   setTimeout(async ()=>{
     let name=prompt("Game Over! Your score: ₦"+score+"\nEnter name for leaderboard:");
-    if(name){
-      await saveScore(name.substring(0,12));
-    }
-    score=0;
-    scoreEl.innerText='₦0';
+    if(name){ await saveScore(name.substring(0,12)); }
+    score=0; scoreEl.innerText='₦0';
     document.querySelectorAll('.obstacle,.coin').forEach(el=>el.remove());
-    gameActive=true;
-    loadBoard();
+    gameActive=true; loadBoard();
   },200);
 }
-
-function claimPrize(){
-  window.open("https://wa.me/2348125563943?text=I%20won%20Lagos%20Hustle%20Week%20"+getWeekNumber()+"%20with%20score%20%E2%82%A6"+score,"_blank");
-}
+function claimPrize(){ window.open("https://wa.me/2348125563943?text=I%20won%20Lagos%20Hustle%20Week%20"+getWeekNumber()+"%20with%20score%20%E2%82%A6"+score,"_blank"); }
+window.claimPrize=claimPrize;
 
 loadBoard();
 setInterval(createObstacle,1500);
