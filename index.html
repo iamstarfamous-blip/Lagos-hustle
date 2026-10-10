@@ -28,9 +28,7 @@ h2{margin:8px;color:#ff9900}
 <div id="list">Loading global scores... 🌍</div>
 <button onclick="claim()" style="background:#25D366;color:#fff;margin-top:8px">Claim Prize - WhatsApp 📲</button>
 </div>
-
 <script>
-// YOUR REAL FIREBASE CONFIG - WEEK 41
 const firebaseConfig = {
   apiKey: "AIzaSyCdmLasZpFtzhfTjn65dyggLxsNCTkHuZI",
   authDomain: "lagos-hustle-a27d7.firebaseapp.com",
@@ -41,8 +39,6 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
-// Game vars
 let c=document.getElementById("g"),ctx=c.getContext("2d");
 let y=260,vy=0,score=0,high=parseInt(localStorage.getItem("lagos_high")||"0"),muted=false,gameOver=false;
 let obs=[],coins=[],frame=0;
@@ -51,8 +47,7 @@ let audioCtx;
 function getAudio(){if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); return audioCtx;}
 function beep(f,d,t){if(muted) return; try{let ac=getAudio(); let o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.type=t||'sine';o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(0.3,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.01,ac.currentTime+d);o.start();o.stop(ac.currentTime+d);}catch(e){}}
 function toggleSound(){muted=!muted;document.getElementById("snd").innerText=muted?'🔇':'🔊'; if(!muted) getAudio().resume();}
-function claim(){let m=encodeURIComponent("I won Lagos Hustle Week 41! My best: ₦"+high+" - Claim ₦500 airtime! My name: "+(localStorage.getItem("playerName")||"player")); window.open("https://wa.me/2348123456789?text="+m);}
-
+function claim(){let m=encodeURIComponent("I won Lagos Hustle Week 41! My best: ₦"+high+" - Claim ₦500 airtime! My name: "+(localStorage.getItem("playerName")||"player")); window.open("https://wa.me/2348125563943?text="+m);}
 function saveGlobal(){
   let name=localStorage.getItem("playerName")||prompt("Enter your name for GLOBAL board:")||"Anon";
   localStorage.setItem("playerName",name);
@@ -69,42 +64,30 @@ function loadGlobal(){
     document.getElementById("list").innerHTML=html;
   });
 }
-
 function reset(){y=260;vy=0;score=0;obs=[];coins=[];gameOver=false;document.getElementById("s").innerText=0;}
-
 function loop(){
   if(gameOver) return;
   frame++; vy+=0.55; y+=vy;
   if(y>500){y=500; vy=0;}
   if(y<0) y=0;
-  
   ctx.clearRect(0,0,360,520);
-  // ground
   ctx.fillStyle="#333"; ctx.fillRect(0,500,360,20);
-  
-  // player
   ctx.fillStyle="#000"; ctx.fillRect(30,y,22,22);
   ctx.fillStyle="#ff0"; ctx.fillRect(32,y+4,6,6);
-  
-  // obstacles
   if(frame%90==0) obs.push({x:360,y:470});
   obs.forEach((o,i)=>{
     o.x-=4; ctx.fillStyle="#ff3300"; ctx.fillRect(o.x,o.y,26,30);
     if(o.x<52&&o.x>8&&y>440){ gameOver=true; if(score>high){high=score; localStorage.setItem("lagos_high",high); document.getElementById("h").innerText=high; saveGlobal();} beep(120,0.6,'sawtooth'); setTimeout(()=>{alert("Game Over! Score ₦"+score+"\nGlobal board updated!"); reset(); loop();},150); }
     if(o.x<-30) obs.splice(i,1);
   });
-  
-  // coins
   if(frame%70==0) coins.push({x:360,y:Math.random()*350+50});
   coins.forEach((co,i)=>{
     co.x-=4; ctx.fillStyle="gold"; ctx.beginPath(); ctx.arc(co.x,co.y,11,0,Math.PI*2); ctx.fill(); ctx.fillStyle="#000"; ctx.font="bold 12px Arial"; ctx.fillText("₦",co.x-4,co.y+4);
     if(Math.abs(co.x-41)<20&&Math.abs(co.y-y)<20){ score+=10; document.getElementById("s").innerText=score; coins.splice(i,1); beep(900,0.12); beep(1200,0.12); }
     if(co.x<-20) coins.splice(i,1);
   });
-  
   requestAnimationFrame(loop);
 }
-
 loadGlobal(); loop();
 c.addEventListener("touchstart",e=>{e.preventDefault(); if(audioCtx==undefined) getAudio(); jump();},{passive:false});
 function jump(){ if(gameOver){reset(); loop(); return;} vy=-11; beep(500,0.1,'square'); }
