@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Lagos Hustle V3</title>
+<title>Lagos Hustle V4 - Money Edition</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}body{background:#000;color:#fff;font-family:Inter;overflow:hidden;touch-action:none}
@@ -11,55 +11,49 @@ canvas{background:#1a1a1a;display:block;width:100vw;height:calc(100vh - 56px - 9
 #pad{height:90px;display:flex;justify-content:space-around;align-items:center;background:#0a0a0a;padding:10px}
 .btn{width:75px;height:75px;border-radius:50%;background:#222;border:2px solid #333;color:#fff;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center}
 .btn:active{background:#00ff88;color:#000}
-#menu{position:fixed;inset:0;background:#000f;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;padding:20px;text-align:center}
-#menu h1{font-family:'Bebas Neue';font-size:70px;line-height:.9}#menu h1 span{color:#00ff88}
-input{background:#151515;border:2px solid #333;color:#fff;padding:16px;border-radius:12px;width:280px;font-size:18px;font-weight:700;margin:14px 0;outline:none;text-align:center}
-input:focus{border-color:#00ff88}
-#play{background:#00ff88;color:#000;border:0;padding:18px 40px;border-radius:30px;font-weight:900;font-size:20px;width:280px}
-#lb{margin-top:18px;width:300px;max-height:28vh;overflow:auto;background:#111;border-radius:12px;padding:10px}
-.r{display:flex;justify-content:space-between;padding:8px;background:#ffffff0a;margin:4px 0;border-radius:8px}
+#menu{position:fixed;inset:0;background:#000f;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;padding:20px;text-align:center;overflow:auto}
+#menu h1{font-family:'Bebas Neue';font-size:64px;line-height:.9}#menu h1 span{color:#00ff88}
+input{background:#151515;border:2px solid #333;color:#fff;padding:14px;border-radius:12px;width:280px;font-size:16px;font-weight:700;margin:10px 0;outline:none;text-align:center}
+#play{background:#00ff88;color:#000;border:0;padding:16px 40px;border-radius:30px;font-weight:900;font-size:18px;width:280px;margin-top:6px}
+#donate{background:#ffcc00;color:#000;border:0;padding:14px 20px;border-radius:30px;font-weight:900;font-size:14px;width:280px;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px}
+#donate:active{transform:scale(0.96)}
+#lb{margin-top:14px;width:300px;max-height:22vh;overflow:auto;background:#111;border-radius:12px;padding:10px}
+.r{display:flex;justify-content:space-between;padding:8px;background:#ffffff0a;margin:4px 0;border-radius:8px;font-size:13px}
+#toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:#00ff88;color:#000;padding:12px 22px;border-radius:30px;font-weight:900;display:none;z-index:50}
 </style></head><body>
 <div id="top"><b>LAGOS <i>HUSTLE</i></b><div id="sc">₦0</div></div>
 <canvas id="cv"></canvas>
 <div id="pad"><div class="btn" id="L">◀</div><div class="btn" id="J">JUMP</div><div class="btn" id="R">▶</div></div>
-<div id="menu"><h1>LAGOS<br><span>HUSTLE</span></h1><p style="opacity:.6;margin:10px">Dodge DANFO, collect ₦, top global board</p><input id="nm" placeholder="Street name"><button id="play">START HUSTLE</button><div id="lb">Loading global...</div><div style="font-size:10px;opacity:.3;margin-top:10px">V3 LIVE • LAGOS-HUSTLE-A27D7</div></div>
+<div id="menu"><h1>LAGOS<br><span>HUSTLE</span></h1><p style="opacity:.6;margin:8px;font-size:14px">Dodge DANFO, collect ₦, support real Lagos dev!</p><input id="nm" placeholder="Street name"><button id="play">START HUSTLE</button>
+<button id="donate">💛 SUPPORT DEV - Opay 812***3943</button>
+<div id="lb">Loading global...</div>
+<div style="font-size:10px;opacity:.4;margin-top:8px;text-align:center;line-height:1.3">V4 Money Edition • Opay: 8125563943 • F. Moses<br>Share game = Support hustle</div>
+</div>
+<div id="toast">Number copied! Open Opay to support 💛</div>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getFirestore,collection,addDoc,query,orderBy,limit,getDocs,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const cfg={apiKey:"AIzaSyCdmLasZpFtzhfTjn65dyggLxsNCTkHuZI",authDomain:"lagos-hustle-a27d7.firebaseapp.com",projectId:"lagos-hustle-a27d7",storageBucket:"lagos-hustle-a27d7.firebasestorage.app",messagingSenderId:"737760929025",appId:"1:737760929025:web:ab7221ad816c83accba700"};
 const app=initializeApp(cfg);const db=getFirestore(app);const ref=collection(db,"leaderboard");
 const cv=document.getElementById('cv'),cx=cv.getContext('2d'),scEl=document.getElementById('sc'),menu=document.getElementById('menu'),nm=document.getElementById('nm'),lb=document.getElementById('lb');
-let W=window.innerWidth,H=window.innerHeight-146;cv.width=W;cv.height=H;
-addEventListener('resize',()=>{W=innerWidth;H=innerHeight-146;cv.width=W;cv.height=H});
+let W=innerWidth,H=innerHeight-146;cv.width=W;cv.height=H;addEventListener('resize',()=>{W=innerWidth;H=innerHeight-146;cv.width=W;cv.height=H});
 let state='menu',score=0,speed=0,f=0,lane=1,py=H-90,vy=0,onG=true,obs=[],coins=[],lanes=3;
 function laneX(l){return (W/lanes)*l + (W/lanes)/2}
 function drawRoad(){cx.fillStyle='#222';cx.fillRect(0,0,W,H);for(let i=0;i<lanes;i++){cx.fillStyle=i%2?'#1e1e1e':'#252525';cx.fillRect((W/lanes)*i,0,W/lanes,H)}cx.strokeStyle='#444';cx.setLineDash([25,25]);cx.lineWidth=2;for(let i=1;i<lanes;i++){cx.beginPath();cx.moveTo(W/lanes*i,0);cx.lineTo(W/lanes*i,H);cx.stroke()}cx.setLineDash([])}
-function drawPlayer(){let x=laneX(lane);cx.save();cx.translate(x,py);
-cx.fillStyle='#0008';cx.fillRect(-30,28,60,10);
-cx.fillStyle='#00ff88';cx.fillRect(-28,-24,56,52);
-cx.fillStyle='#ffdbac';cx.fillRect(-18,-48,36,24);
-cx.fillStyle='#000';cx.fillRect(-12,-36,8,6);cx.fillRect(4,-36,8,6);
-cx.restore()}
+function drawPlayer(){let x=laneX(lane);cx.save();cx.translate(x,py);cx.fillStyle='#0008';cx.fillRect(-30,28,60,10);cx.fillStyle='#00ff88';cx.fillRect(-28,-24,56,52);cx.fillStyle='#ffdbac';cx.fillRect(-18,-48,36,24);cx.fillStyle='#000';cx.fillRect(-12,-36,8,6);cx.fillRect(4,-36,8,6);cx.restore()}
 function loop(){if(state!='play')return;f++;drawRoad();speed+=0.003;score++;scEl.textContent='₦'+score;
 if(f%75==0){obs.push({l:Math.floor(Math.random()*3),y:-80})}
 if(f%60==0){coins.push({l:Math.floor(Math.random()*3),y:-60})}
-if(!onG){vy+=1;py+=vy;if(py>=H-90){py=H-90;vy=0;onG=true}}
-drawPlayer();
-for(let i=obs.length-1;i>=0;i--){let o=obs[i];o.y+=6+speed*5;let ox=laneX(o.l);
-cx.fillStyle='#ffcc00';cx.fillRect(ox-42,o.y-10,84,58);cx.fillStyle='#000';cx.fillRect(ox-36,o.y,72,16);cx.fillStyle='#333';cx.fillRect(ox-32,o.y+38,20,10);cx.fillRect(ox+12,o.y+38,20,10);
-if(o.y>H+60){obs.splice(i,1);continue}
-if(o.l==lane && o.y+48>py-20 && o.y<py+28){return over()}}
-for(let i=coins.length-1;i>=0;i--){let c=coins[i];c.y+=6+speed*5;let cx2=laneX(c.l);
-cx.fillStyle='#00ff88';cx.beginPath();cx.arc(cx2,c.y,24,0,Math.PI*2);cx.fill();cx.fillStyle='#000';cx.font='900 20px Inter';cx.fillText('₦',cx2-9,c.y+7);
-if(c.y>H+60){coins.splice(i,1);continue}
-if(c.l==lane && Math.abs(c.y-py)<36){score+=200;coins.splice(i,1);navigator.vibrate&&navigator.vibrate(30)}}
+if(!onG){vy+=1;py+=vy;if(py>=H-90){py=H-90;vy=0;onG=true}}drawPlayer();
+for(let i=obs.length-1;i>=0;i--){let o=obs[i];o.y+=6+speed*5;let ox=laneX(o.l);cx.fillStyle='#ffcc00';cx.fillRect(ox-42,o.y-10,84,58);cx.fillStyle='#000';cx.fillRect(ox-36,o.y,72,16);cx.fillStyle='#333';cx.fillRect(ox-32,o.y+38,20,10);cx.fillRect(ox+12,o.y+38,20,10);if(o.y>H+60){obs.splice(i,1);continue}if(o.l==lane && o.y+48>py-20 && o.y<py+28){return over()}}
+for(let i=coins.length-1;i>=0;i--){let c=coins[i];c.y+=6+speed*5;let cx2=laneX(c.l);cx.fillStyle='#00ff88';cx.beginPath();cx.arc(cx2,c.y,24,0,Math.PI*2);cx.fill();cx.fillStyle='#000';cx.font='900 20px Inter';cx.fillText('₦',cx2-9,c.y+7);if(c.y>H+60){coins.splice(i,1);continue}if(c.l==lane && Math.abs(c.y-py)<36){score+=200;coins.splice(i,1);navigator.vibrate&&navigator.vibrate(30)}}
 requestAnimationFrame(loop)}
 async function loadB(){try{let q=query(ref,orderBy('score','desc'),limit(15));let s=await getDocs(q);let h='';let r=1;s.forEach(d=>{let v=d.data();h+=`<div class=r><span>${r}. ${v.name}</span><span>₦${v.score}</span></div>`;r++});lb.innerHTML=h||'No scores yet'}catch(e){lb.textContent=e.message}}
 async function over(){state='over';menu.style.display='flex';menu.querySelector('h1').innerHTML=`JAMMED!<br><span>₦${score}</span>`;document.getElementById('play').textContent='TRY AGAIN';if(score>20){try{await addDoc(ref,{name:(nm.value||'Anon').slice(0,12),score,created:serverTimestamp()})}catch{}}await loadB()}
 function start(){if(!nm.value.trim()){nm.style.borderColor='red';return}localStorage.setItem('lh',nm.value);score=0;speed=0;f=0;obs=[];coins=[];lane=1;py=H-90;vy=0;onG=true;state='play';menu.style.display='none';loop()}
 document.getElementById('play').onclick=start;
-document.getElementById('J').ontouchstart=(e)=>{e.preventDefault();if(onG&&state=='play'){vy=-19;onG=false}};document.getElementById('J').onclick=()=>{if(onG&&state=='play'){vy=-19;onG=false}};
-document.getElementById('L').ontouchstart=(e)=>{e.preventDefault();lane=Math.max(0,lane-1)};document.getElementById('R').ontouchstart=(e)=>{e.preventDefault();lane=Math.min(2,lane+1)};
+document.getElementById('donate').onclick=async()=>{const num='8125563943';try{await navigator.clipboard.writeText(num);document.getElementById('toast').style.display='block';setTimeout(()=>document.getElementById('toast').style.display='none',2500);}catch{alert('Opay: 8125563943\nName: Ogungbade Feranmi Moses\nThanks for supporting! 💛')}}
+document.getElementById('J').ontouchstart=(e)=>{e.preventDefault();if(onG&&state=='play'){vy=-19;onG=false}};document.getElementById('L').ontouchstart=(e)=>{e.preventDefault();lane=Math.max(0,lane-1)};document.getElementById('R').ontouchstart=(e)=>{e.preventDefault();lane=Math.min(2,lane+1)};
 addEventListener('keydown',e=>{if(e.code=='Space'||e.code=='ArrowUp'){if(onG){vy=-19;onG=false}} if(e.code=='ArrowLeft')lane=Math.max(0,lane-1);if(e.code=='ArrowRight')lane=Math.min(2,lane+1)});
 loadB();nm.value=localStorage.getItem('lh')||'Oluwadamilol';
 </script></body></html>
